@@ -37,4 +37,5 @@ import './case/case-incident/case-incident';
 import './case/case-rfi/case-rfi';
 import './case/case-rft/case-rft';
 import './entitySetting/entitySetting';
+import './outcome/outcome';
 // endregion

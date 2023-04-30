@@ -7750,6 +7750,9 @@ type Query {
   entitySetting(id: String!): EntitySetting
   entitySettingByType(targetType: String!): EntitySetting
   entitySettings(first: Int, after: ID, orderBy: EntitySettingsOrdering, orderMode: OrderingMode, filters: [EntitySettingsFiltering!], filterMode: FilterMode, search: String): EntitySettingConnection
+  outcome(id: String!): Outcome
+  notificationOutcomes: [Outcome]
+  outcomes(first: Int, after: ID, orderBy: OutcomeOrdering, orderMode: OrderingMode, filters: [OutcomeFiltering!], filterMode: FilterMode, search: String): OutcomeConnection
 }
 
 type Subscription {
@@ -8451,6 +8454,9 @@ type Mutation {
   caseRftContextPatch(id: ID!, input: EditContext!): CaseRft
   caseRftContextClean(id: ID!): CaseRft
   entitySettingsFieldPatch(ids: [ID!]!, input: [EditInput!]!, commitMessage: String, references: [String]): [EntitySetting]
+  outcomeDelete(id: ID!): ID
+  outcomeFieldPatch(id: ID!, input: [EditInput!]!): Outcome
+  outcomeAdd(input: OutcomeAddInput!): Outcome
 }
 
 type Channel implements BasicObject & StixObject & StixCoreObject & StixDomainObject {
@@ -10282,4 +10288,56 @@ type EntitySettingConnection {
 type EntitySettingEdge {
   cursor: String!
   node: EntitySetting!
+}
+
+enum OutcomeFilter {
+  created
+}
+
+input OutcomeFiltering {
+  key: [OutcomeFilter!]!
+  values: [String]
+  operator: String
+  filterMode: FilterMode
+}
+
+enum OutcomeOrdering {
+  name
+  created
+}
+
+type OutcomeParameter {
+  key: String
+  value: String
+}
+
+type Outcome implements InternalObject & BasicObject {
+  id: ID!
+  standard_id: String!
+  entity_type: String!
+  parent_types: [String]!
+  created: DateTime
+  modified: DateTime
+  name: String!
+  description: String
+  outcome_connector_id: String!
+  outcome_configuration: String!
+}
+
+type OutcomeConnection {
+  pageInfo: PageInfo!
+  edges: [OutcomeEdge]
+}
+
+type OutcomeEdge {
+  cursor: String!
+  node: Outcome!
+}
+
+input OutcomeAddInput {
+  name: name_String_NotNull_minLength_1!
+  description: String
+  outcome_connector_id: String!
+  outcome_configuration: String!
+  outcome_restricted_members_ids: [String!]
 }

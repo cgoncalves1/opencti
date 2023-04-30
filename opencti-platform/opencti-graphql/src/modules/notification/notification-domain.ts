@@ -50,11 +50,9 @@ export const addDigestTrigger = async (context: AuthContext, user: AuthUser, tri
 export const triggerGet = (context: AuthContext, user: AuthUser, triggerId: string): BasicStoreEntityTrigger => {
   return storeLoadById(context, user, triggerId, ENTITY_TYPE_TRIGGER) as unknown as BasicStoreEntityTrigger;
 };
-
 export const triggersGet = (context: AuthContext, user: AuthUser, triggerIds: string[]): BasicStoreEntityTrigger[] => {
   return internalFindByIds(context, user, triggerIds) as unknown as BasicStoreEntityTrigger[];
 };
-
 export const triggerEdit = async (context: AuthContext, user: AuthUser, triggerId: string, input: EditInput[]) => {
   const { element: updatedElem } = await updateAttribute(context, user, triggerId, ENTITY_TYPE_TRIGGER, input);
   return notify(BUS_TOPICS[ENTITY_TYPE_TRIGGER].EDIT_TOPIC, updatedElem, user);
@@ -67,7 +65,6 @@ export const triggerDelete = async (context: AuthContext, user: AuthUser, trigge
 export const triggersFind = (context: AuthContext, user: AuthUser, opts: QueryTriggersArgs) => {
   return listEntitiesPaginated<BasicStoreEntityTrigger>(context, user, [ENTITY_TYPE_TRIGGER], opts);
 };
-
 export const myTriggersFind = (context: AuthContext, user: AuthUser, opts: QueryTriggersArgs) => {
   const queryFilters = [...(opts.filters || []), { key: 'user_ids', values: [user.id] }];
   const queryArgs = { ...opts, filters: queryFilters };
@@ -78,23 +75,19 @@ export const myTriggersFind = (context: AuthContext, user: AuthUser, opts: Query
 export const notificationGet = (context: AuthContext, user: AuthUser, narrativeId: string): BasicStoreEntityNotification => {
   return storeLoadById(context, user, narrativeId, ENTITY_TYPE_NOTIFICATION) as unknown as BasicStoreEntityNotification;
 };
-
 export const notificationsFind = (context: AuthContext, user: AuthUser, opts: QueryNotificationsArgs) => {
   return listEntitiesPaginated<BasicStoreEntityNotification>(context, user, [ENTITY_TYPE_NOTIFICATION], opts);
 };
-
 export const myNotificationsFind = (context: AuthContext, user: AuthUser, opts: QueryNotificationsArgs) => {
   const queryFilters = [...(opts.filters || []), { key: 'user_id', values: [user.id] }];
   const queryArgs = { ...opts, filters: queryFilters };
   return listEntitiesPaginated<BasicStoreEntityNotification>(context, user, [ENTITY_TYPE_NOTIFICATION], queryArgs);
 };
-
 export const myUnreadNotificationsCount = async (context: AuthContext, user: AuthUser, userId = null) => {
   const queryFilters = [{ key: 'user_id', values: [userId ?? user.id] }, { key: 'is_read', values: [false] }];
   const queryArgs = { filters: queryFilters };
   return elCount(context, user, READ_INDEX_INTERNAL_OBJECTS, { ...queryArgs, types: [ENTITY_TYPE_NOTIFICATION] });
 };
-
 export const notificationDelete = async (context: AuthContext, user: AuthUser, notificationId: string) => {
   const notification = await notificationGet(context, user, notificationId);
   await deleteElementById(context, user, notificationId, ENTITY_TYPE_NOTIFICATION);
@@ -102,14 +95,12 @@ export const notificationDelete = async (context: AuthContext, user: AuthUser, n
   await notify(BUS_TOPICS[NOTIFICATION_NUMBER].EDIT_TOPIC, { count: unreadNotificationsCount, user_id: notification.user_id }, user);
   return notificationId;
 };
-
 export const notificationEditRead = async (context: AuthContext, user: AuthUser, notificationId: string, read: boolean) => {
   const { element } = await patchAttribute(context, user, notificationId, ENTITY_TYPE_NOTIFICATION, { is_read: read });
   const unreadNotificationsCount = await myUnreadNotificationsCount(context, user);
   await notify(BUS_TOPICS[NOTIFICATION_NUMBER].EDIT_TOPIC, { count: unreadNotificationsCount, user_id: element.user_id }, user);
   return notify(BUS_TOPICS[ENTITY_TYPE_NOTIFICATION].EDIT_TOPIC, element, user);
 };
-
 export const addNotification = async (context: AuthContext, user: AuthUser, notification: NotificationAddInput) => {
   const created = await createEntity(context, user, notification, ENTITY_TYPE_NOTIFICATION);
   const unreadNotificationsCount = await myUnreadNotificationsCount(context, user, created.user_id);

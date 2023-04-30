@@ -46,6 +46,8 @@ import TriggersField from './TriggersField';
 import TimePickerField from '../../../../components/TimePickerField';
 import { dayStartDate, parse } from '../../../../utils/Time';
 import FilterIconButton from '../../../../components/FilterIconButton';
+import OutcomeField from '../../common/form/OutcomeField';
+import { Option } from '../../common/form/ReferenceField';
 
 const useStyles = makeStyles<Theme>((theme) => ({
   drawerPaper: {
@@ -156,7 +158,7 @@ interface TriggerLiveAddInput {
   name: string;
   description: string;
   event_types: Array<TriggerEventType>;
-  outcomes: string[];
+  outcomes: Option[];
 }
 
 const TriggerLiveCreation: FunctionComponent<TriggerCreationProps> = ({
@@ -215,11 +217,6 @@ const TriggerLiveCreation: FunctionComponent<TriggerCreationProps> = ({
     update: t('Modification'),
     delete: t('Deletion'),
   };
-  const outcomesOptions: Record<string, string> = {
-    'f4ee7b33-006a-4b0d-b57d-411ad288653d': t('User interface'),
-    '44fcf1f4-8e31-4b31-8dbc-cd6993e1b822': t('Email'),
-    webhook: t('Webhook'),
-  };
   const onLiveSubmit: FormikConfig<TriggerLiveAddInput>['onSubmit'] = (
     values: TriggerLiveAddInput,
     { setSubmitting, setErrors, resetForm }: FormikHelpers<TriggerLiveAddInput>,
@@ -228,8 +225,8 @@ const TriggerLiveCreation: FunctionComponent<TriggerCreationProps> = ({
     const finalValues = {
       name: values.name,
       event_types: values.event_types,
-      outcomes: values.outcomes,
       description: values.description,
+      outcomes: R.pluck('value', values.outcomes),
       filters: jsonFilters,
     };
     commitLive({
@@ -284,15 +281,13 @@ const TriggerLiveCreation: FunctionComponent<TriggerCreationProps> = ({
         rows="4"
         style={{ marginTop: 20 }}
       />
-      <Field
-        component={SelectField}
+      <Field component={SelectField}
         variant="standard"
         name="event_types"
         label={t('Triggering on')}
         fullWidth={true}
         multiple={true}
-        onChange={(name: string, value: string[]) => setFieldValue('event_types', value)
-        }
+        onChange={(name: string, value: string[]) => setFieldValue('event_types', value)}
         inputProps={{ name: 'event_types', id: 'event_types' }}
         containerstyle={{ marginTop: 20, width: '100%' }}
         renderValue={(selected: Array<string>) => (
@@ -301,8 +296,7 @@ const TriggerLiveCreation: FunctionComponent<TriggerCreationProps> = ({
               <Chip key={value} label={eventTypesOptions[value]} />
             ))}
           </Box>
-        )}
-      >
+        )}>
         <MenuItem value="create">
           <Checkbox checked={values.event_types.indexOf('create') > -1} />
           <ListItemText primary={eventTypesOptions.create} />
@@ -316,52 +310,7 @@ const TriggerLiveCreation: FunctionComponent<TriggerCreationProps> = ({
           <ListItemText primary={eventTypesOptions.delete} />
         </MenuItem>
       </Field>
-      <Field
-        component={SelectField}
-        variant="standard"
-        name="outcomes"
-        label={t('Notification')}
-        fullWidth={true}
-        multiple={true}
-        onChange={(name: string, value: string[]) => setFieldValue('outcomes', value)
-        }
-        inputProps={{ name: 'outcomes', id: 'outcomes' }}
-        containerstyle={{ marginTop: 20, width: '100%' }}
-        renderValue={(selected: Array<string>) => (
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-            {selected.map((value) => (
-              <Chip key={value} label={outcomesOptions[value]} />
-            ))}
-          </Box>
-        )}
-      >
-        <MenuItem value="f4ee7b33-006a-4b0d-b57d-411ad288653d">
-          <Checkbox
-            checked={
-              values.outcomes.indexOf('f4ee7b33-006a-4b0d-b57d-411ad288653d')
-              > -1
-            }
-          />
-          <ListItemText
-            primary={outcomesOptions['f4ee7b33-006a-4b0d-b57d-411ad288653d']}
-          />
-        </MenuItem>
-        <MenuItem value="44fcf1f4-8e31-4b31-8dbc-cd6993e1b822">
-          <Checkbox
-            checked={
-              values.outcomes.indexOf('44fcf1f4-8e31-4b31-8dbc-cd6993e1b822')
-              > -1
-            }
-          />
-          <ListItemText
-            primary={outcomesOptions['44fcf1f4-8e31-4b31-8dbc-cd6993e1b822']}
-          />
-        </MenuItem>
-        <MenuItem value="webhook" disabled={true}>
-          <Checkbox checked={values.outcomes.indexOf('webhook') > -1} />
-          <ListItemText primary={outcomesOptions.webhook} />
-        </MenuItem>
-      </Field>
+      <OutcomeField name="outcomes" helpertext={''} style={{ marginTop: 20 }} />
       <div style={{ marginTop: 35 }}>
         <Filters
           variant="text"

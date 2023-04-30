@@ -4,8 +4,15 @@ import { logApp, TOPIC_PREFIX } from '../config/conf';
 import { ENTITY_TYPE_CONNECTOR, ENTITY_TYPE_RULE, ENTITY_TYPE_SETTINGS, ENTITY_TYPE_STATUS, ENTITY_TYPE_STATUS_TEMPLATE, ENTITY_TYPE_STREAM_COLLECTION, ENTITY_TYPE_USER } from '../schema/internalObject';
 import { executionContext, SYSTEM_USER } from '../utils/access';
 import { connectors as findConnectors } from '../database/repository';
-import type { BasicStoreEntity, BasicStreamEntity, BasicTriggerEntity, BasicWorkflowStatusEntity, BasicWorkflowTemplateEntity } from '../types/store';
-import { EntityOptions, internalFindByIds, listAllEntities } from '../database/middleware-loader';
+import type {
+  BasicStoreEntity,
+  BasicStoreRelation,
+  BasicStreamEntity,
+  BasicTriggerEntity,
+  BasicWorkflowStatusEntity,
+  BasicWorkflowTemplateEntity
+} from '../types/store';
+import { EntityOptions, internalFindByIds, listAllEntities, listAllRelations } from '../database/middleware-loader';
 import { ENTITY_TYPE_MARKING_DEFINITION } from '../schema/stixMetaObject';
 import { resetCacheForEntity, writeCacheForEntity } from '../database/cache';
 import type { AuthContext } from '../types/user';
@@ -17,6 +24,20 @@ import { BasicStoreEntityTrigger, ENTITY_TYPE_TRIGGER } from '../modules/notific
 import { ES_MAX_CONCURRENCY } from '../database/engine';
 import { resolveUserById } from '../domain/user';
 import { pubSubSubscription } from '../database/redis';
+import { BasicStoreEntityOutcome, ENTITY_TYPE_OUTCOME } from '../modules/outcome/outcome-types';
+import { STATIC_OUTCOMES } from '../modules/outcome/outcome-statics';
+import { RELATION_MEMBER_OF, RELATION_PARTICIPATE_TO } from '../schema/internalRelationship';
+
+const computeGroupsAndOrganizationsMap = async (context: AuthContext) => {
+  const memberOfRelations = await listAllRelations<BasicStoreRelation>(context, SYSTEM_USER, [RELATION_MEMBER_OF, RELATION_PARTICIPATE_TO], { connectionFormat: false });
+  const memberOfGroups = memberOfRelations.filter((m) => m.entity_type === RELATION_MEMBER_OF)
+    .map((mr) => ({ group: mr.toId, user: mr.fromId }));
+  const membersGroupMap = new Map(Object.entries(R.groupBy((r) => r.group, memberOfGroups)).map(([k, v]) => [k, v.map((t) => t.user)]));
+  const memberOfOrgs = memberOfRelations.filter((m) => m.entity_type === RELATION_PARTICIPATE_TO)
+    .map((mr) => ({ organization: mr.toId, user: mr.fromId }));
+  const membersOrganizationMap = new Map(Object.entries(R.groupBy((r) => r.organization, memberOfOrgs)).map(([k, v]) => [k, v.map((t) => t.user)]));
+  return new Map([...membersGroupMap, ...membersOrganizationMap]);
+};
 
 const workflowStatuses = (context: AuthContext) => {
   const reloadStatuses = async () => {
@@ -96,12 +117,24 @@ const platformEntitySettings = (context: AuthContext) => {
   };
   return { values: null, fn: reloadEntitySettings };
 };
-
 const platformStreams = (context: AuthContext) => {
   const reloadStreams = () => {
     return listAllEntities(context, SYSTEM_USER, [ENTITY_TYPE_STREAM_COLLECTION], { connectionFormat: false });
   };
   return { values: null, fn: reloadStreams };
+};
+const platformOutcomes = (context: AuthContext) => {
+  const reloadOutcomes = async () => {
+    const outcomes = await listAllEntities<BasicStoreEntityOutcome>(context, SYSTEM_USER, [ENTITY_TYPE_OUTCOME], { connectionFormat: false });
+    const groupOrganizationMap = await computeGroupsAndOrganizationsMap(context);
+    const completedOutcomes = outcomes.map((out) => {
+      const outcome_restricted_users_ids = (out.outcome_restricted_members_ids ?? [])
+        .map((id: string) => groupOrganizationMap.get(id)).flat();
+      return { ...out, outcome_restricted_users_ids };
+    });
+    return [...completedOutcomes, ...STATIC_OUTCOMES].sort();
+  };
+  return { values: null, fn: reloadOutcomes };
 };
 
 const initCacheManager = () => {
@@ -119,6 +152,7 @@ const initCacheManager = () => {
     writeCacheForEntity(ENTITY_TYPE_IDENTITY_ORGANIZATION, platformOrganizations(context));
     writeCacheForEntity(ENTITY_TYPE_RESOLVED_FILTERS, platformResolvedFilters(context));
     writeCacheForEntity(ENTITY_TYPE_STREAM_COLLECTION, platformStreams(context));
+    writeCacheForEntity(ENTITY_TYPE_OUTCOME, platformOutcomes(context));
   };
   return {
     init: () => initCacheContent(), // Use for testing

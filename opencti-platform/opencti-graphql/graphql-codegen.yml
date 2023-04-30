@@ -30,6 +30,7 @@ generates:
         Notification: ../modules/notification/notification-types#BasicStoreEntityNotification
         Trigger: ../modules/notification/notification-types#BasicStoreEntityTrigger
         EntitySetting: ../modules/entitySetting/entitySetting-types#BasicStoreEntityEntitySetting
+        Outcome: ../modules/outcome/outcome-types#BasicStoreEntityOutcome
   ./graphql.schema.json:
     plugins:
       - "introspection"
