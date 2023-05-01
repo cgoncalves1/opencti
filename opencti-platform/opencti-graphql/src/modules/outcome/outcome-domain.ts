@@ -8,7 +8,7 @@ import { listEntitiesPaginated, storeLoadById, } from '../../database/middleware
 import { now } from '../../utils/format';
 import type { BasicStoreEntityOutcome } from './outcome-types';
 import { ENTITY_TYPE_OUTCOME } from './outcome-types';
-import { OUTCOMES_CONNECTORS } from './outcome-statics';
+import { BUILTIN_OUTCOMES_CONNECTORS } from './outcome-statics';
 import { UnsupportedError } from '../../config/errors';
 import { isEmptyField } from '../../database/utils';
 import { getEntitiesFromCache } from '../../database/cache';
@@ -17,11 +17,11 @@ import { SYSTEM_USER } from '../../utils/access';
 const ajv = new Ajv();
 
 export const addOutcome = async (context: AuthContext, user: AuthUser, outcome: OutcomeAddInput): Promise<BasicStoreEntityOutcome> => {
-  const outcomeConnector = OUTCOMES_CONNECTORS[outcome.outcome_connector_id];
+  const outcomeConnector = BUILTIN_OUTCOMES_CONNECTORS[outcome.outcome_connector_id];
   if (isEmptyField(outcomeConnector)) {
     throw UnsupportedError('Invalid outcome connector', { id: outcome.outcome_connector_id });
   }
-  const validate = ajv.compile(outcomeConnector.schema);
+  const validate = ajv.compile(JSON.parse(outcomeConnector.connector_schema));
   const isValidConfiguration = validate(JSON.parse(outcome.outcome_configuration));
   if (!isValidConfiguration) {
     throw UnsupportedError('This configuration is invalid', { configuration: outcome.outcome_configuration });

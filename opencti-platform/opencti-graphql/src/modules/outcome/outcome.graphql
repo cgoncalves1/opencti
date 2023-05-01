@@ -17,6 +17,13 @@ type OutcomeParameter {
     value: String
 }
 
+type OutcomeConnector {
+    id: ID! # internal_id
+    name: String!
+    description: String
+    connector_schema: String!
+}
+
 type Outcome implements InternalObject & BasicObject {
     id: ID! # internal_id
     standard_id: String!
@@ -26,6 +33,7 @@ type Outcome implements InternalObject & BasicObject {
     modified: DateTime
     name: String!
     description: String
+    outcome_connector: OutcomeConnector!
     outcome_connector_id: String!
     outcome_configuration: String!
 }
@@ -41,8 +49,8 @@ type OutcomeEdge {
 
 # Queries
 type Query {
-    outcome(id: String!): Outcome @auth
     notificationOutcomes: [Outcome] @auth
+    outcome(id: String!): Outcome @auth(for: [SETTINGS_SETACCESSES])
     outcomes(
         first: Int
         after: ID
@@ -64,7 +72,7 @@ input OutcomeAddInput {
 }
 
 type Mutation {
-    outcomeDelete(id: ID!): ID @auth
-    outcomeFieldPatch(id: ID!, input: [EditInput!]!): Outcome @auth
-    outcomeAdd(input: OutcomeAddInput!): Outcome @auth
+    outcomeDelete(id: ID!): ID @auth(for: [SETTINGS_SETACCESSES])
+    outcomeFieldPatch(id: ID!, input: [EditInput!]!): Outcome @auth(for: [SETTINGS_SETACCESSES])
+    outcomeAdd(input: OutcomeAddInput!): Outcome @auth(for: [SETTINGS_SETACCESSES])
 }

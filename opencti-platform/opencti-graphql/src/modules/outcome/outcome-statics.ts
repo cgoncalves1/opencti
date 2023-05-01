@@ -1,4 +1,3 @@
-import type { SomeJSONSchema } from 'ajv/dist/types/json-schema';
 import type { JSONSchemaType } from 'ajv';
 import type { BasicStoreEntityOutcome } from './outcome-types';
 
@@ -26,8 +25,8 @@ export interface OUTCOME_CONNECTOR_WEBHOOK_INTERFACE {
   verb: string
   url: string
   template: string
-  params: Record<string, string>,
-  headers: Record<string, string>,
+  params: { attribute: string, value: string }[],
+  headers: { attribute: string, value: string }[],
 }
 export const OUTCOME_CONNECTOR_WEBHOOK_CONFIG: JSONSchemaType<OUTCOME_CONNECTOR_WEBHOOK_INTERFACE> = {
   type: 'object',
@@ -35,35 +34,63 @@ export const OUTCOME_CONNECTOR_WEBHOOK_CONFIG: JSONSchemaType<OUTCOME_CONNECTOR_
     verb: { type: 'string', enum: ['GET', 'POST', 'PUT', ' DELETE'] },
     url: { type: 'string' },
     template: { type: 'string' },
-    params: { type: 'object', additionalProperties: { type: 'string' }, required: [] },
-    headers: { type: 'object', additionalProperties: { type: 'string' }, required: [] },
+    params: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          attribute: {
+            type: 'string',
+          },
+          value: {
+            type: 'string',
+          },
+        },
+        required: ['attribute', 'value']
+      },
+    },
+    headers: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          attribute: {
+            type: 'string',
+          },
+          value: {
+            type: 'string',
+          },
+        },
+        required: ['attribute', 'value']
+      },
+    },
   },
   required: ['url', 'verb', 'template'],
 };
 // endregion
 
 interface OutcomeConnector {
-  internal_id: string
+  id: string
   name: string
   description: string
   built_in: boolean
-  schema: SomeJSONSchema
+  connector_schema: string
 }
 
-export const OUTCOMES_CONNECTORS: Record<string, OutcomeConnector> = {
+export const BUILTIN_OUTCOMES_CONNECTORS: Record<string, OutcomeConnector> = {
   [OUTCOME_CONNECTOR_EMAIL]: {
-    internal_id: OUTCOME_CONNECTOR_EMAIL,
-    name: 'Basic email notification',
+    id: OUTCOME_CONNECTOR_EMAIL,
+    name: 'Platform mailer',
     description: 'Send notification to the user email',
     built_in: true,
-    schema: OUTCOME_CONNECTOR_EMAIL_CONFIG
+    connector_schema: JSON.stringify(OUTCOME_CONNECTOR_EMAIL_CONFIG)
   },
   [OUTCOME_CONNECTOR_WEBHOOK]: {
-    internal_id: OUTCOME_CONNECTOR_WEBHOOK,
+    id: OUTCOME_CONNECTOR_WEBHOOK,
     name: 'Generic webhook',
     description: 'Send notification to a generic webhook',
     built_in: true,
-    schema: OUTCOME_CONNECTOR_WEBHOOK_CONFIG
+    connector_schema: JSON.stringify(OUTCOME_CONNECTOR_WEBHOOK_CONFIG)
   }
 };
 

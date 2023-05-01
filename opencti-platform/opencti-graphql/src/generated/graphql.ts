@@ -3209,6 +3209,7 @@ export type Connector = BasicObject & InternalObject & {
   active?: Maybe<Scalars['Boolean']>;
   auto?: Maybe<Scalars['Boolean']>;
   config?: Maybe<ConnectorConfig>;
+  connector_schema?: Maybe<Scalars['String']>;
   connector_scope?: Maybe<Array<Scalars['String']>>;
   connector_state?: Maybe<Scalars['String']>;
   connector_state_reset?: Maybe<Scalars['Boolean']>;
@@ -14894,6 +14895,7 @@ export type Outcome = BasicObject & InternalObject & {
   modified?: Maybe<Scalars['DateTime']>;
   name: Scalars['String'];
   outcome_configuration: Scalars['String'];
+  outcome_connector: OutcomeConnector;
   outcome_connector_id: Scalars['String'];
   parent_types: Array<Maybe<Scalars['String']>>;
   standard_id: Scalars['String'];
@@ -14911,6 +14913,14 @@ export type OutcomeConnection = {
   __typename?: 'OutcomeConnection';
   edges?: Maybe<Array<Maybe<OutcomeEdge>>>;
   pageInfo: PageInfo;
+};
+
+export type OutcomeConnector = {
+  __typename?: 'OutcomeConnector';
+  connector_schema: Scalars['String'];
+  description?: Maybe<Scalars['String']>;
+  id: Scalars['ID'];
+  name: Scalars['String'];
 };
 
 export type OutcomeEdge = {
@@ -15856,6 +15866,7 @@ export type Query = {
   connectors?: Maybe<Array<Maybe<Connector>>>;
   connectorsForExport?: Maybe<Array<Maybe<Connector>>>;
   connectorsForImport?: Maybe<Array<Maybe<Connector>>>;
+  connectorsForNotification?: Maybe<Array<Maybe<Connector>>>;
   connectorsForWorker?: Maybe<Array<Maybe<Connector>>>;
   container?: Maybe<Container>;
   containers?: Maybe<ContainerConnection>;
@@ -25452,6 +25463,7 @@ export type ResolversTypes = ResolversObject<{
   Outcome: ResolverTypeWrapper<BasicStoreEntityOutcome>;
   OutcomeAddInput: OutcomeAddInput;
   OutcomeConnection: ResolverTypeWrapper<Omit<OutcomeConnection, 'edges'> & { edges?: Maybe<Array<Maybe<ResolversTypes['OutcomeEdge']>>> }>;
+  OutcomeConnector: ResolverTypeWrapper<OutcomeConnector>;
   OutcomeEdge: ResolverTypeWrapper<Omit<OutcomeEdge, 'node'> & { node: ResolversTypes['Outcome'] }>;
   OutcomeFilter: OutcomeFilter;
   OutcomeFiltering: OutcomeFiltering;
@@ -26102,6 +26114,7 @@ export type ResolversParentTypes = ResolversObject<{
   Outcome: BasicStoreEntityOutcome;
   OutcomeAddInput: OutcomeAddInput;
   OutcomeConnection: Omit<OutcomeConnection, 'edges'> & { edges?: Maybe<Array<Maybe<ResolversParentTypes['OutcomeEdge']>>> };
+  OutcomeConnector: OutcomeConnector;
   OutcomeEdge: Omit<OutcomeEdge, 'node'> & { node: ResolversParentTypes['Outcome'] };
   OutcomeFiltering: OutcomeFiltering;
   OutcomeParameter: OutcomeParameter;
@@ -27259,6 +27272,7 @@ export type ConnectorResolvers<ContextType = any, ParentType extends ResolversPa
   active?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   auto?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   config?: Resolver<Maybe<ResolversTypes['ConnectorConfig']>, ParentType, ContextType>;
+  connector_schema?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   connector_scope?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
   connector_state?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   connector_state_reset?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
@@ -30409,6 +30423,7 @@ export type OutcomeResolvers<ContextType = any, ParentType extends ResolversPare
   modified?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   outcome_configuration?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  outcome_connector?: Resolver<ResolversTypes['OutcomeConnector'], ParentType, ContextType>;
   outcome_connector_id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   parent_types?: Resolver<Array<Maybe<ResolversTypes['String']>>, ParentType, ContextType>;
   standard_id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -30418,6 +30433,14 @@ export type OutcomeResolvers<ContextType = any, ParentType extends ResolversPare
 export type OutcomeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['OutcomeConnection'] = ResolversParentTypes['OutcomeConnection']> = ResolversObject<{
   edges?: Resolver<Maybe<Array<Maybe<ResolversTypes['OutcomeEdge']>>>, ParentType, ContextType>;
   pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type OutcomeConnectorResolvers<ContextType = any, ParentType extends ResolversParentTypes['OutcomeConnector'] = ResolversParentTypes['OutcomeConnector']> = ResolversObject<{
+  connector_schema?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -30712,6 +30735,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   connectors?: Resolver<Maybe<Array<Maybe<ResolversTypes['Connector']>>>, ParentType, ContextType>;
   connectorsForExport?: Resolver<Maybe<Array<Maybe<ResolversTypes['Connector']>>>, ParentType, ContextType>;
   connectorsForImport?: Resolver<Maybe<Array<Maybe<ResolversTypes['Connector']>>>, ParentType, ContextType>;
+  connectorsForNotification?: Resolver<Maybe<Array<Maybe<ResolversTypes['Connector']>>>, ParentType, ContextType>;
   connectorsForWorker?: Resolver<Maybe<Array<Maybe<ResolversTypes['Connector']>>>, ParentType, ContextType>;
   container?: Resolver<Maybe<ResolversTypes['Container']>, ParentType, ContextType, Partial<QueryContainerArgs>>;
   containers?: Resolver<Maybe<ResolversTypes['ContainerConnection']>, ParentType, ContextType, Partial<QueryContainersArgs>>;
@@ -33369,6 +33393,7 @@ export type Resolvers<ContextType = any> = ResolversObject<{
   OtpElement?: OtpElementResolvers<ContextType>;
   Outcome?: OutcomeResolvers<ContextType>;
   OutcomeConnection?: OutcomeConnectionResolvers<ContextType>;
+  OutcomeConnector?: OutcomeConnectorResolvers<ContextType>;
   OutcomeEdge?: OutcomeEdgeResolvers<ContextType>;
   OutcomeParameter?: OutcomeParameterResolvers<ContextType>;
   OverviewMetrics?: OverviewMetricsResolvers<ContextType>;

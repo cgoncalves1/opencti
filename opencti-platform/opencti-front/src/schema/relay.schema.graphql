@@ -1412,6 +1412,7 @@ type Connector implements BasicObject & InternalObject {
   connector_type: String
   connector_scope: [String!]
   connector_state: String
+  connector_schema: String
   connector_state_reset: Boolean
   connector_user_id: ID!
   updated_at: DateTime
@@ -7549,6 +7550,7 @@ type Query {
   connectorsForWorker: [Connector]
   connectorsForExport: [Connector]
   connectorsForImport: [Connector]
+  connectorsForNotification: [Connector]
   work(id: ID!): Work
   works(first: Int, after: ID, orderBy: WorksOrdering, orderMode: OrderingMode, search: String, filters: [WorksFiltering], filterMode: FilterMode): WorkConnection
   runtimeAttributes(first: Int, search: String, orderMode: OrderingMode, attributeName: String!): AttributeConnection
@@ -7750,8 +7752,8 @@ type Query {
   entitySetting(id: String!): EntitySetting
   entitySettingByType(targetType: String!): EntitySetting
   entitySettings(first: Int, after: ID, orderBy: EntitySettingsOrdering, orderMode: OrderingMode, filters: [EntitySettingsFiltering!], filterMode: FilterMode, search: String): EntitySettingConnection
-  outcome(id: String!): Outcome
   notificationOutcomes: [Outcome]
+  outcome(id: String!): Outcome
   outcomes(first: Int, after: ID, orderBy: OutcomeOrdering, orderMode: OrderingMode, filters: [OutcomeFiltering!], filterMode: FilterMode, search: String): OutcomeConnection
 }
 
@@ -10311,6 +10313,13 @@ type OutcomeParameter {
   value: String
 }
 
+type OutcomeConnector {
+  id: ID!
+  name: String!
+  description: String
+  connector_schema: String!
+}
+
 type Outcome implements InternalObject & BasicObject {
   id: ID!
   standard_id: String!
@@ -10320,6 +10329,7 @@ type Outcome implements InternalObject & BasicObject {
   modified: DateTime
   name: String!
   description: String
+  outcome_connector: OutcomeConnector!
   outcome_connector_id: String!
   outcome_configuration: String!
 }

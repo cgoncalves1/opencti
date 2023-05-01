@@ -1,3 +1,4 @@
+import * as R from 'ramda';
 import ejs from 'ejs';
 import axios from 'axios';
 import { clearIntervalAsync, setIntervalAsync, SetIntervalAsyncTimer } from 'set-interval-async/fixed';
@@ -100,7 +101,9 @@ const processNotificationEvent = async (
       const { url, template, verb, params, headers } = JSON.parse(configuration ?? '{}') as OUTCOME_CONNECTOR_WEBHOOK_INTERFACE;
       const generatedWebhook = ejs.render(template, templateData);
       const dataJson = JSON.parse(generatedWebhook);
-      axios({ url, method: verb, params, headers, data: dataJson }).catch((err) => {
+      const dataHeaders = R.fromPairs((headers ?? []).map((h) => [h.attribute, h.value]));
+      const dataParameters = R.fromPairs((params ?? []).map((h) => [h.attribute, h.value]));
+      axios({ url, method: verb, params: dataParameters, headers: dataHeaders, data: dataJson }).catch((err) => {
         logApp.error('[OPENCTI-PUBLISHER] Error webhook publication', { error: err });
       });
     } else {

@@ -36,6 +36,12 @@ const TopMenuSettings = () => {
                 classes={{ root: classes.button }}>
                 {t('Parameters')}
             </Button>
+            <Button component={Link} size="small" to="/dashboard/settings/notification"
+                    variant={location.pathname.includes('/dashboard/settings/notification') ? 'contained' : 'text'}
+                    color={location.pathname.includes('/dashboard/settings/notification') ? 'secondary' : 'primary'}
+                    classes={{ root: classes.button }}>
+                {t('Notifications')}
+            </Button>
             <Security needs={[SETTINGS_SETMARKINGS, SETTINGS_SETACCESSES]}>
                 <Button component={Link} size="small" to="/dashboard/settings/accesses"
                     variant={location.pathname.includes('/dashboard/settings/accesses') ? 'contained' : 'text'}

@@ -25,6 +25,7 @@ import SubTypes from './sub_types/SubTypes';
 import RootSubType from './sub_types/Root';
 import RootGroup from './groups/Root';
 import RootRole from './roles/Root';
+import RootNotification from './notifications/Root';
 
 const Root = () => (
     <Switch>
@@ -50,6 +51,13 @@ const Root = () => (
               <Redirect to="/dashboard/settings/accesses/roles" />
             </Security>
           )}
+        />
+        <BoundaryRoute
+            exact
+            path="/dashboard/settings/notification"
+            render={() => (
+                <Redirect to="/dashboard/settings/notification/outcome" />
+            )}
         />
         <BoundaryRoute
           exact
@@ -125,6 +133,10 @@ const Root = () => (
           exact
           path="/dashboard/settings/vocabularies/statusTemplates"
           component={StatusTemplates}
+        />
+        <BoundaryRoute
+            path="/dashboard/settings/notification"
+            render={() => <RootNotification />}
         />
         <BoundaryRoute
           exact
