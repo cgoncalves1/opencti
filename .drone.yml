@@ -52,7 +52,10 @@ steps:
   - name: frontend-tests
     image: node:16-alpine
     commands:
-      - cd opencti-platform/opencti-front
+      - cd opencti-platform/opencti-graphql
+      - yarn install
+      - yarn build
+      - cd ../opencti-front
       - yarn install
       - yarn build
       - yarn check-ts
