@@ -6,6 +6,8 @@ import {printSchema} from 'graphql/utilities';
 import createSchema from '../src/graphql/schema';
 import _ from '../src/modules/index';
 
+console.log('this generate-schema script is called...');
+
 const schema = createSchema();
 const printedSchema = printSchema(schema);
 
