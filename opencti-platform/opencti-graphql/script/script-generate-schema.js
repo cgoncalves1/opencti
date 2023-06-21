@@ -19,4 +19,8 @@ try {
   }
 }
 
+console.log('[script-generate-schema]: starting generation...');
+
 fs.writeFileSync('../opencti-front/src/schema/relay.schema.graphql', printedSchema);
+
+console.log('[script-generate-schema]: generation done')
