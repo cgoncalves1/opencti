@@ -6,7 +6,7 @@ import {printSchema} from 'graphql/utilities';
 import createSchema from '../src/graphql/schema';
 import _ from '../src/modules/index';
 
-console.log('this generate-schema script is called...');
+console.log('[script-generate-schema]: starting generation...');
 
 const schema = createSchema();
 const printedSchema = printSchema(schema);
@@ -18,8 +18,6 @@ try {
     throw error;
   }
 }
-
-console.log('[script-generate-schema]: starting generation...');
 
 fs.writeFileSync('../opencti-front/src/schema/relay.schema.graphql', printedSchema);
 
