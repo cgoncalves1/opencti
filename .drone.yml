@@ -12,6 +12,10 @@ steps:
       - pip3 install --no-cache --upgrade pip setuptools
       - cd opencti-platform/opencti-graphql
       - yarn install
+      - yarn install:python
+      - yarn build:types
+      - node builder/schema/schema.js
+      - node build/script-generate-schema.js
       - yarn build
       - cd ../opencti-front
       - yarn install
