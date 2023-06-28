@@ -1,40 +1,29 @@
-import React, { Component } from 'react';
+import React from 'react';
 import * as PropTypes from 'prop-types';
-import * as R from 'ramda';
-import withTheme from '@mui/styles/withTheme';
-import withStyles from '@mui/styles/withStyles';
 import { QueryRenderer } from '../../../../relay/environment';
-import inject18n from '../../../../components/i18n';
-import StixCoreObjectOpinionsRadar, {
-  stixCoreObjectOpinionsRadarDistributionQuery,
-} from './StixCoreObjectOpinionsRadar';
+import StixCoreObjectOpinionsRadar, { stixCoreObjectOpinionsRadarDistributionQuery } from './StixCoreObjectOpinionsRadar';
+import useVocabularyCategory from '../../../../utils/hooks/useVocabularyCategory';
 
-const styles = () => ({
-  container: {
-    marign: 0,
-  },
-});
-
-class StixCoreObjectOpinions extends Component {
-  render() {
-    const { title, variant, height, marginTop, stixCoreObjectId, field } = this.props;
-    const opinionsDistributionVariables = {
-      objectId: stixCoreObjectId,
-      field: field || 'opinion',
-      operation: 'count',
-      limit: 8,
-    };
-    return (
+const StixCoreObjectOpinions = (props) => {
+  const { stixCoreObjectId, variant, height, marginTop } = props;
+  const { typeToCategory } = useVocabularyCategory();
+  const opinionsDistributionVariables = {
+    objectId: stixCoreObjectId,
+    field: 'opinion',
+    operation: 'count',
+    limit: 8,
+    category: typeToCategory('opinion-ov'),
+  };
+  return (
       <QueryRenderer
         query={stixCoreObjectOpinionsRadarDistributionQuery}
         variables={opinionsDistributionVariables}
-        render={({ props }) => {
-          if (props) {
+        render={({ props: containerProps }) => {
+          if (containerProps) {
             return (
               <StixCoreObjectOpinionsRadar
                 stixCoreObjectId={stixCoreObjectId}
-                data={props}
-                title={title}
+                data={containerProps}
                 variant={variant}
                 height={height}
                 marginTop={marginTop}
@@ -45,24 +34,14 @@ class StixCoreObjectOpinions extends Component {
           return <div />;
         }}
       />
-    );
-  }
-}
+  );
+};
 
 StixCoreObjectOpinions.propTypes = {
-  data: PropTypes.object,
-  title: PropTypes.string,
-  field: PropTypes.string,
-  classes: PropTypes.object,
-  theme: PropTypes.object,
-  t: PropTypes.func,
+  stixCoreObjectId: PropTypes.string,
   variant: PropTypes.string,
   height: PropTypes.number,
   marginTop: PropTypes.number,
 };
 
-export default R.compose(
-  inject18n,
-  withTheme,
-  withStyles(styles),
-)(StixCoreObjectOpinions);
+export default StixCoreObjectOpinions;

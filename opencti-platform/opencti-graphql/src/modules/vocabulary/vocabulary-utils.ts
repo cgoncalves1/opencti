@@ -9,7 +9,7 @@ export const builtInOv = [
   'pattern_type_ov',
 ];
 
-export const openVocabularies: Record<VocabularyCategory, Array<{ key: string, description?: string, aliases?: string[] }>> = {
+export const openVocabularies: Record<VocabularyCategory, Array<{ key: string, description?: string, aliases?: string[], order?: number }>> = {
   // A
   account_type_ov: [
     { key: 'facebook', description: 'Specifies a Facebook account' },
@@ -747,20 +747,24 @@ export const openVocabularies: Record<VocabularyCategory, Array<{ key: string, d
   opinion_ov: [
     {
       key: 'strongly-disagree',
-      description: 'The creator strongly disagrees with the information and believes it is inaccurate or incorrect.'
+      description: 'The creator strongly disagrees with the information and believes it is inaccurate or incorrect.',
+      order: 1,
     },
     {
       key: 'disagree',
-      description: 'The creator disagrees with the information and believes it is inaccurate or incorrect.'
+      description: 'The creator disagrees with the information and believes it is inaccurate or incorrect.',
+      order: 2,
     },
-    { key: 'neutral', description: 'The creator is neutral about the accuracy or correctness of the information.' },
+    { key: 'neutral', description: 'The creator is neutral about the accuracy or correctness of the information.', order: 3 },
     {
       key: 'agree',
-      description: 'The creator agrees with the information and believes that it is accurate and correct.'
+      description: 'The creator agrees with the information and believes that it is accurate and correct.',
+      order: 4,
     },
     {
       key: 'strongly-agree',
-      description: 'The creator strongly agrees with the information and believes that it is accurate and correct.'
+      description: 'The creator strongly agrees with the information and believes that it is accurate and correct.',
+      order: 5,
     },
   ],
   // P

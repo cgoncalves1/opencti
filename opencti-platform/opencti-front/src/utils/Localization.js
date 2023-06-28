@@ -1994,9 +1994,11 @@ const i18n = {
       Reset: 'Reiniciar',
       'Do you want to clear the works of this connector?':
         '¿Quieres eliminar todas las tareas de este conector?',
+      'strongly-disagree': 'muy en desacuerdo',
       disagree: 'en desacuerdo',
       neutral: 'neutral',
       agree: 'de acuerdo',
+      'strongly-agree': 'totalmente de acuerdo',
       'Automatic references at file upload':
         'Referencias automáticas al cargar el archivo',
       'suggestion_threats-indicators':
@@ -4010,9 +4012,11 @@ const i18n = {
       Reset: 'Réinitialiser',
       'Do you want to clear the works of this connector?':
         'Souhaitez-vous nettoyer toutes les exécutions de ce connecteur ?',
+      'strongly-disagree': 'fortement en désaccord',
       disagree: 'désapprouve',
       neutral: 'neutre',
       agree: 'approuve',
+      'strongly-agree': 'fortement en accord',
       'Automatic references at file upload':
         'Références auto sur upload du fichier',
       'suggestion_threats-indicators':
@@ -5962,9 +5966,11 @@ const i18n = {
       Reset: 'リセット',
       'Do you want to clear the works of this connector?':
         'このコネクタの情報を削除しますか？',
+      'strongly-disagree': '強く同意しない',
       disagree: '反対',
       neutral: '中立',
       agree: '賛成',
+      'strongly-agree': '強く同意します',
       'Automatic references at file upload': 'ファイルアップロード時の自動参照',
       'suggestion_threats-indicators':
         'インジケータと脅威に `指し示す` のリレーションシップを作成したあと、全てのリレーションシップをコンテナに追加する。',
@@ -7802,9 +7808,11 @@ const i18n = {
       'Indicators/observables generation': '指标/可观察的生成',
       'Create an opinion': '创建意见',
       'Update opinion': '更新意见',
+      'strongly-disagree': '强烈反对',
       disagree: '不同意',
       neutral: '中性的',
       agree: '同意',
+      'strongly-agree': '非常同意',
       'Automatic references at file upload': '文件上传时自动引用',
       'suggestion_threats-indicators':
         '在指标和所选威胁之间创建“指示”关系，然后将所有关系添加到容器中',

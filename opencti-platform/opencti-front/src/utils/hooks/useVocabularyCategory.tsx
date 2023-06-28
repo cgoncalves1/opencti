@@ -15,6 +15,7 @@ export interface VocabularyDefinition {
     required: boolean;
     multiple: boolean;
   }[];
+  ordered?: boolean;
 }
 
 export const vocabCategoriesQuery = graphql`
@@ -28,6 +29,7 @@ export const vocabCategoriesQuery = graphql`
         required
         multiple
       }
+      ordered
     }
   }
 `;
@@ -49,7 +51,9 @@ export const vocabFragment = graphql`
         required
         multiple
       }
+      ordered
     }
+    order
   }
 `;
 
@@ -88,6 +92,8 @@ const useVocabularyCategory = () => {
 
   const allFields = data.vocabularyCategories.flatMap((vc) => vc.fields);
 
+  const isCategoryOrdered = (vocabularyCategory: VocabularyCategory) => data.vocabularyCategories.find((vc) => vc.key === vocabularyCategory)?.ordered ?? false;
+
   return {
     categories,
     fields: allFields.map(({ key }) => key),
@@ -96,6 +102,7 @@ const useVocabularyCategory = () => {
     fieldToCategory,
     typeToCategory,
     categoriesOptions: categories.map((cat) => ({ value: cat, label: cat })),
+    isCategoryOrdered,
   };
 };
 

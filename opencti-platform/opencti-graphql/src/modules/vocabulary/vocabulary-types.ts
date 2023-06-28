@@ -25,6 +25,7 @@ export const ENTITY_TYPE_VOCABULARY = 'Vocabulary';
 interface VocabularyDefinition {
   description?: string,
   entity_types: string[],
+  ordered?: boolean,
   fields: {
     key: string,
     required: boolean,
@@ -229,6 +230,7 @@ export const vocabularyDefinitions: Record<VocabularyCategory, VocabularyDefinit
   opinion_ov: {
     description: 'This enumeration captures a degree of agreement with the information in a STIX Object. It is an ordered enumeration, with the earlier terms representing disagreement, the middle term neutral, and the later terms representing agreement',
     entity_types: [ENTITY_TYPE_CONTAINER_OPINION],
+    ordered: true,
     fields: [{
       key: 'opinion',
       required: true,

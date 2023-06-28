@@ -119,3 +119,47 @@ describe('Vocabulary resolver standard behavior', () => {
     expect(queryResult.data.vocabularyFieldPatch.name).toEqual('facebook');
   });
 });
+
+describe('Vocabulary resolver ordered behavior', () => {
+  let vocabularyId;
+  it('should vocabulary created', async () => {
+    const CREATE_QUERY = gql`
+      mutation VocabularyAdd($input: VocabularyAddInput!) {
+        vocabularyAdd(input: $input) {
+          id
+          name
+        }
+      }
+    `;
+    const vocabularyName = '100% agree';
+    const VOCABULARY_TO_CREATE = {
+      input: {
+        name: vocabularyName,
+        category: 'opinion_ov',
+        order: 1,
+      },
+    };
+    const queryResult = await queryAsAdmin({
+      query: CREATE_QUERY,
+      variables: VOCABULARY_TO_CREATE,
+    });
+    expect(queryResult).not
+    expect(queryResult).not.toBeNull();
+    expect(queryResult.data.vocabularyAdd).not.toBeNull();
+    expect(queryResult.data.vocabularyAdd.name).toEqual(vocabularyName);
+    vocabularyId = queryResult.data.vocabularyAdd.id;
+  });
+  it('should vocabulary deleted', async () => {
+    const DELETE_QUERY = gql`
+      mutation VocabularyDelete($id: ID!) {
+        vocabularyDelete(id: $id)
+      }
+    `;
+    // Delete the vocabulary
+    const queryResult = await queryAsAdmin({
+      query: DELETE_QUERY,
+      variables: { id: vocabularyId },
+    });
+    expect(queryResult).not.toBeNull();
+  });
+});

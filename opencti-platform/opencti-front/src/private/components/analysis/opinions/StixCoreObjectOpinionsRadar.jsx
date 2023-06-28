@@ -1,8 +1,6 @@
-import React, { Component } from 'react';
+import React, { useState } from 'react';
 import * as PropTypes from 'prop-types';
 import * as R from 'ramda';
-import withTheme from '@mui/styles/withTheme';
-import withStyles from '@mui/styles/withStyles';
 import CircularProgress from '@mui/material/CircularProgress';
 import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
@@ -15,21 +13,24 @@ import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import { Field, Form, Formik } from 'formik';
-import { graphql, createRefetchContainer } from 'react-relay';
+import { createRefetchContainer, graphql, useMutation } from 'react-relay';
+import makeStyles from '@mui/styles/makeStyles';
+import { useTheme } from '@mui/styles';
 import Chart from '../../common/charts/Chart';
-import { commitMutation, QueryRenderer } from '../../../../relay/environment';
-import inject18n from '../../../../components/i18n';
+import { QueryRenderer } from '../../../../relay/environment';
+import { useFormatter } from '../../../../components/i18n';
 import Security from '../../../../utils/Security';
-import { KNOWLEDGE_KNUPDATE } from '../../../../utils/hooks/useGranted';
-import { opinionCreationMutation } from './OpinionCreation';
+import useGranted, { KNOWLEDGE_KNPARTICIPATE, KNOWLEDGE_KNUPDATE } from '../../../../utils/hooks/useGranted';
+import { opinionCreationMutation, opinionCreationUserMutation } from './OpinionCreation';
 import MarkdownField from '../../../../components/MarkdownField';
 import { adaptFieldValue } from '../../../../utils/String';
 import { opinionMutationFieldPatch } from './OpinionEditionOverview';
 import { radarChartOptions } from '../../../../utils/Charts';
 import { fieldSpacingContainerStyle } from '../../../../utils/field';
 import ConfidenceField from '../../common/form/ConfidenceField';
+import generateGreenToRedColors from '../../../../utils/ColorsGenerator';
 
-const styles = () => ({
+const useStyles = makeStyles(() => ({
   paper: {
     height: 300,
     minHeight: 300,
@@ -38,27 +39,7 @@ const styles = () => ({
     padding: 0,
     borderRadius: 6,
   },
-  'strongly-disagree': {
-    fontSize: 12,
-    backgroundColor: '#ff5722',
-  },
-  disagree: {
-    fontSize: 12,
-    color: '#ffc107',
-  },
-  neutral: {
-    fontSize: 12,
-    color: '#cddc39',
-  },
-  agree: {
-    fontSize: 12,
-    color: '#8bc34a',
-  },
-  'strongly-agree': {
-    fontSize: 12,
-    color: '#4caf50',
-  },
-});
+}));
 
 const stixCoreObjectOpinionsRadarMyOpinionQuery = graphql`
   query StixCoreObjectOpinionsRadarMyOpinionQuery($id: String!) {
@@ -66,65 +47,70 @@ const stixCoreObjectOpinionsRadarMyOpinionQuery = graphql`
       id
       opinion
       explanation
+      confidence
     }
   }
 `;
 
-const opinions = [
-  'strongly-disagree',
-  'disagree',
-  'neutral',
-  'agree',
-  'strongly-agree',
-];
+const StixCoreObjectOpinionsRadarComponent = (props) => {
+  const classes = useStyles();
+  const { t } = useFormatter();
+  const theme = useTheme();
+  const { stixCoreObjectId, data, variant, height, marginTop, paginationOptions } = props;
 
-class StixCoreObjectOpinionsRadarComponent extends Component {
-  constructor(props) {
-    super(props);
-    this.state = { open: false, currentOpinion: null };
-  }
+  const opinionOptions = props.data.vocabularies.edges
+    .map((edge) => edge.node)
+    .sort((n1, n2) => {
+      if (n1.order === n2.order) {
+        return n1.name.localeCompare(n2.name);
+      }
+      return n1.order - n2.order;
+    })
+    .map((node, idx) => ({
+      label: node.name.toLowerCase(),
+      value: idx + 1,
+    }));
+  const marks = opinionOptions.map((m, idx) => {
+    if (idx === 0) return { label: '-', value: m.value };
+    if (idx === opinionOptions.length - 1) return { label: '+', value: m.value };
+    return m;
+  });
+  const opinionLabel = (currentOpinionValue) => opinionOptions[currentOpinionValue - 1].label;
+  const opinionValue = (label) => opinionOptions.find((m) => m.label === label)?.value;
 
-  handleOpen() {
-    this.setState({ open: true });
-  }
+  const [open, setOpen] = useState(false);
+  const [currentOpinion, setCurrentOpinion] = useState(null);
 
-  handleClose() {
-    this.setState({ open: false });
-  }
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
 
-  handleChangeCurrentOpinion(event, value) {
-    this.setState({ currentOpinion: value });
-  }
+  const handleChangeCurrentOpinion = (value) => setCurrentOpinion(value);
 
-  onSubmit(values, { setSubmitting, resetForm }) {
-    const { currentOpinion } = this.state;
+  const userIsKnowledgeEditor = useGranted([KNOWLEDGE_KNUPDATE]);
+  const [commitCreation] = useMutation(userIsKnowledgeEditor ? opinionCreationMutation : opinionCreationUserMutation);
+  const [commitEdition] = useMutation(opinionMutationFieldPatch);
+
+  const onSubmit = (values, { setSubmitting, resetForm }) => {
     const { alreadyExistingOpinion } = values;
-    const { stixCoreObjectId, data, paginationOptions } = this.props;
-    const defaultMarking = R.pathOr(
-      [],
-      ['stixCoreObject', 'objectMarking', 'edges'],
-      data,
-    ).map((n) => n.node.id);
+    const opinion = currentOpinion ?? Math.round(opinionOptions.length / 2);
     if (alreadyExistingOpinion) {
       const inputValues = R.pipe(
         R.dissoc('alreadyExistingOpinion'),
         R.assoc('confidence', parseInt(values.confidence, 10)),
-        R.assoc('opinion', opinions[(currentOpinion || 3) - 1]),
-        R.assoc('objectMarking', defaultMarking),
+        R.assoc('opinion', opinionLabel(opinion)),
         R.toPairs,
         R.map((n) => ({
           key: n[0],
           value: adaptFieldValue(n[1]),
         })),
       )(values);
-      commitMutation({
-        mutation: opinionMutationFieldPatch,
+      commitEdition({
         variables: {
           id: alreadyExistingOpinion,
           input: inputValues,
         },
         onCompleted: () => {
-          this.props.relay.refetch(paginationOptions);
+          props.relay.refetch(paginationOptions);
           setSubmitting(false);
           resetForm();
         },
@@ -133,70 +119,46 @@ class StixCoreObjectOpinionsRadarComponent extends Component {
       const adaptedValues = R.pipe(
         R.dissoc('alreadyExistingOpinion'),
         R.assoc('confidence', parseInt(values.confidence, 10)),
-        R.assoc('opinion', opinions[(currentOpinion || 3) - 1]),
-        R.assoc('objectMarking', defaultMarking),
+        R.assoc('opinion', opinionLabel(opinion)),
         R.assoc('objects', [stixCoreObjectId]),
       )(values);
-      commitMutation({
-        mutation: opinionCreationMutation,
+      commitCreation({
         variables: {
           input: adaptedValues,
         },
         setSubmitting,
         onCompleted: () => {
-          this.props.relay.refetch(paginationOptions);
+          props.relay.refetch(paginationOptions);
           setSubmitting(false);
           resetForm();
         },
       });
     }
-  }
+  };
 
-  onReset() {
-    this.handleClose();
-  }
+  const onReset = () => handleClose();
 
-  renderContent() {
-    const { t, data, field, theme, height } = this.props;
+  const renderContent = () => {
     if (data && data.opinionsDistribution) {
-      let distributionData;
-      if (field && field.includes('internal_id')) {
-        distributionData = R.map(
-          (n) => R.assoc('label', n.entity.name, n),
-          data.opinionsDistribution,
-        );
-      } else {
-        distributionData = R.map(
-          (n) => R.assoc('label', n.label.toLowerCase(), n),
-          data.opinionsDistribution,
-        );
-      }
+      let distributionData = data.opinionsDistribution.map((n) => ({
+        ...n,
+        label: n.label.toLowerCase(),
+      }));
       distributionData = R.indexBy(R.prop('label'), distributionData);
-      const labels = [
-        'strongly-disagree',
-        'disagree',
-        'neutral',
-        'agree',
-        'strongly-agree',
-      ];
       const chartData = [
         {
           name: t('Opinions'),
-          data: [
-            distributionData['strongly-disagree']?.value || 0,
-            distributionData.disagree?.value || 0,
-            distributionData.neutral?.value || 0,
-            distributionData.agree?.value || 0,
-            distributionData['strongly-agree']?.value || 0,
-          ],
+          data: opinionOptions.map((m) => distributionData[m.label]?.value || 0),
         },
       ];
+      const labels = opinionOptions.map((m) => m.label);
+      const colors = generateGreenToRedColors(opinionOptions.length);
       return (
         <Chart
           options={radarChartOptions(
             theme,
             labels,
-            ['#ff5722', '#ffc107', '#cddc39', '#8bc34a', '#4caf50'],
+            colors,
             true,
             true,
           )}
@@ -208,27 +170,6 @@ class StixCoreObjectOpinionsRadarComponent extends Component {
       );
     }
 
-    if (data) {
-      return (
-        <div
-          style={{
-            display: 'table',
-            height: '100%',
-            width: '100%',
-          }}
-        >
-          <span
-            style={{
-              display: 'table-cell',
-              verticalAlign: 'middle',
-              textAlign: 'center',
-            }}
-          >
-            {t('No entities of this type has been found.')}
-          </span>
-        </div>
-      );
-    }
     return (
       <div
         style={{
@@ -244,36 +185,26 @@ class StixCoreObjectOpinionsRadarComponent extends Component {
             textAlign: 'center',
           }}
         >
-          <CircularProgress size={40} thickness={2} />
+          {data ? t('No entities of this type has been found.') : <CircularProgress size={40} thickness={2} />}
         </span>
       </div>
     );
-  }
+  };
 
-  render() {
-    const { currentOpinion } = this.state;
-    const { t, classes, title, variant, height, marginTop, stixCoreObjectId } = this.props;
-    const marks = [
-      { label: '-', value: 1 },
-      { label: t('disagree'), value: 2 },
-      { label: t('neutral'), value: 3 },
-      { label: t('agree'), value: 4 },
-      { label: '+', value: 5 },
-    ];
-    return (
+  return (
       <div style={{ height: height || '100%', marginTop: marginTop || 0 }}>
         <Typography
           variant={variant === 'inEntity' ? 'h3' : 'h4'}
           gutterBottom={true}
           style={{ float: 'left' }}
         >
-          {title || t('Distribution of opinions')}
+          {t('Distribution of opinions')}
         </Typography>
-        <Security needs={[KNOWLEDGE_KNUPDATE]}>
+        <Security needs={[KNOWLEDGE_KNUPDATE, KNOWLEDGE_KNPARTICIPATE]}>
           <IconButton
             color="secondary"
             aria-label="Label"
-            onClick={this.handleOpen.bind(this)}
+            onClick={handleOpen}
             style={{ float: 'left', margin: '-15px 0 0 -2px' }}
             size="large"
           >
@@ -281,48 +212,48 @@ class StixCoreObjectOpinionsRadarComponent extends Component {
           </IconButton>
           <Dialog
             PaperProps={{ elevation: 1 }}
-            open={this.state.open}
-            onClose={this.handleClose.bind(this)}
+            open={open}
+            onClose={handleClose}
+            fullWidth={true}
           >
             <QueryRenderer
               query={stixCoreObjectOpinionsRadarMyOpinionQuery}
               variables={{ id: stixCoreObjectId }}
-              render={({ props }) => {
-                if (props) {
-                  const explanation = R.propOr(
-                    '',
-                    'explanation',
-                    props.myOpinion,
-                  );
-                  const opinion = opinions.indexOf(
-                    R.propOr(currentOpinion, 'opinion', props.myOpinion),
-                  ) + 1;
+              render={({ props: containerProps }) => {
+                if (containerProps) {
+                  const value = currentOpinion || opinionValue(containerProps.myOpinion?.opinion) || Math.round(opinionOptions.length / 2);
                   return (
                     <Formik
                       enableReinitialize={true}
                       initialValues={{
-                        alreadyExistingOpinion: props.myOpinion?.id || '',
-                        explanation,
-                        confidence: 75,
+                        alreadyExistingOpinion: containerProps.myOpinion?.id ?? '',
+                        explanation: containerProps.myOpinion?.explanation ?? '',
+                        confidence: containerProps.myOpinion?.confidence ?? 75,
                       }}
-                      onSubmit={this.onSubmit.bind(this)}
-                      onReset={this.onReset.bind(this)}
+                      onSubmit={onSubmit}
+                      onReset={onReset}
                     >
                       {({ submitForm, handleReset, isSubmitting }) => (
                         <Form>
-                          <DialogTitle>{t('Update opinion')}</DialogTitle>
+                          <DialogTitle>{containerProps.myOpinion ? t('Update opinion') : t('Create an opinion')}</DialogTitle>
                           <DialogContent>
                             <Slider
+                              sx={{
+                                '& .MuiSlider-markLabel': {
+                                  textOverflow: 'ellipsis',
+                                  maxWidth: 50,
+                                  overflow: 'hidden',
+                                },
+                              }}
                               style={{ marginTop: 30 }}
-                              value={currentOpinion || opinion || 3}
-                              onChange={this.handleChangeCurrentOpinion.bind(
-                                this,
-                              )}
+                              value={value}
+                              onChange={(_, v) => handleChangeCurrentOpinion(v)}
                               step={1}
                               valueLabelDisplay="on"
+                              valueLabelFormat={(v) => marks[v - 1].label}
                               marks={marks}
                               min={1}
-                              max={5}
+                              max={opinionOptions.length}
                             />
                             <Field
                               component={MarkdownField}
@@ -334,6 +265,7 @@ class StixCoreObjectOpinionsRadarComponent extends Component {
                               style={{ marginTop: 20 }}
                             />
                             <ConfidenceField
+                              entityType="Opinion"
                               containerStyle={fieldSpacingContainerStyle}
                             />
                           </DialogContent>
@@ -364,25 +296,19 @@ class StixCoreObjectOpinionsRadarComponent extends Component {
         </Security>
         <div className="clearfix" />
         {variant === 'inLine' || variant === 'inEntity' ? (
-          this.renderContent()
+          renderContent()
         ) : (
           <Paper classes={{ root: classes.paper }} variant="outlined">
-            {this.renderContent()}
+            {renderContent()}
           </Paper>
         )}
       </div>
-    );
-  }
-}
+  );
+};
 
 StixCoreObjectOpinionsRadarComponent.propTypes = {
   stixCoreObjectId: PropTypes.string,
   data: PropTypes.object,
-  title: PropTypes.string,
-  field: PropTypes.string,
-  classes: PropTypes.object,
-  theme: PropTypes.object,
-  t: PropTypes.func,
   variant: PropTypes.string,
   height: PropTypes.number,
   marginTop: PropTypes.number,
@@ -395,6 +321,7 @@ export const stixCoreObjectOpinionsRadarDistributionQuery = graphql`
     $field: String!
     $operation: StatsOperation!
     $limit: Int
+    $category: VocabularyCategory!
   ) {
     ...StixCoreObjectOpinionsRadar_distribution
       @arguments(
@@ -402,6 +329,7 @@ export const stixCoreObjectOpinionsRadarDistributionQuery = graphql`
         field: $field
         operation: $operation
         limit: $limit
+        category: $category
       )
   }
 `;
@@ -416,6 +344,7 @@ const StixCoreObjectOpinionsRadar = createRefetchContainer(
         field: { type: "String!" }
         operation: { type: "StatsOperation!" }
         limit: { type: "Int", defaultValue: 1000 }
+        category: { type: "VocabularyCategory!" }
       ) {
         opinionsDistribution(
           objectId: $objectId
@@ -434,14 +363,20 @@ const StixCoreObjectOpinionsRadar = createRefetchContainer(
             }
           }
         }
+        vocabularies(category: $category) {
+          edges {
+            node {
+              id
+              name
+              description
+              order
+            }
+          }
+        }
       }
     `,
   },
   stixCoreObjectOpinionsRadarDistributionQuery,
 );
 
-export default R.compose(
-  inject18n,
-  withTheme,
-  withStyles(styles),
-)(StixCoreObjectOpinionsRadar);
+export default StixCoreObjectOpinionsRadar;

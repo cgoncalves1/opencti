@@ -9,8 +9,9 @@ import { TextField } from 'formik-mui';
 import * as Yup from 'yup';
 import makeStyles from '@mui/styles/makeStyles';
 import { FormikConfig } from 'formik/dist/types';
+import * as R from 'ramda';
 import { useFormatter } from '../../../../components/i18n';
-import { formikFieldToEditInput } from '../../../../utils/utils';
+import { formikFieldToEditInput } from '../../../../utils/FormikUtils';
 import { Theme } from '../../../../components/Theme';
 import { useVocabularyCategory_Vocabularynode$data } from '../../../../utils/hooks/__generated__/useVocabularyCategory_Vocabularynode.graphql';
 import { fieldSpacingContainerStyle } from '../../../../utils/field';
@@ -58,15 +59,24 @@ const vocabularyMutationUpdate = graphql`
   }
 `;
 
-const attributeValidation = (t: (s: string) => string) => Yup.object().shape({
-  name: Yup.string().required(t('This field is required')),
-  description: Yup.string().nullable(),
-});
+const attributeValidation = (t: (s: string) => string, isCategoryOrdered: boolean) => {
+  const shape = [
+    ['name', Yup.mixed().required(t('This field is required'))],
+    ['description', Yup.mixed().nullable()],
+  ];
+  if (isCategoryOrdered) {
+    shape.push(['order', Yup.mixed().required(t('This field is required'))]);
+  }
+  return Yup.object().shape({
+    ...Object.fromEntries(shape),
+  });
+};
 
 interface VocabularyEditionFormikValues {
   name: string;
   description: string;
   aliases: { id: string; label: string; value: string }[];
+  order: number | null;
 }
 
 const VocabularyEdition = ({
@@ -79,16 +89,24 @@ const VocabularyEdition = ({
   const { t } = useFormatter();
   const classes = useStyles();
 
+  const isCategoryOrdered = vocab.category.ordered ?? false;
+
   const [commitUpdateMutation] = useMutation(vocabularyMutationUpdate);
 
   const onSubmit: FormikConfig<VocabularyEditionFormikValues>['onSubmit'] = (
     values,
     { setSubmitting },
   ) => {
+    let finalValues;
+    if (!isCategoryOrdered) {
+      finalValues = R.dissoc('order', values);
+    } else {
+      finalValues = values;
+    }
     const input = formikFieldToEditInput(
       {
-        ...values,
-        aliases: values.aliases.map((a) => a.value),
+        ...finalValues,
+        aliases: finalValues.aliases.map((a) => a.value),
       },
       {
         name: vocab.name,
@@ -143,8 +161,9 @@ const VocabularyEdition = ({
               label: n,
             })) as { id: string; label: string; value: string }[],
             description: vocab.description ?? '',
+            order: vocab.order,
           }}
-          validationSchema={attributeValidation(t)}
+          validationSchema={attributeValidation(t, isCategoryOrdered)}
           onSubmit={onSubmit}
         >
           {({ submitForm, isSubmitting }) => (
@@ -187,6 +206,17 @@ const VocabularyEdition = ({
                 )}
                 classes={{ clearIndicator: classes.autoCompleteIndicator }}
               />
+              {isCategoryOrdered
+                && <Field
+                  component={TextField}
+                  variant="standard"
+                  name="order"
+                  label={t('Order')}
+                  fullWidth={true}
+                  type="number"
+                  style={{ marginTop: 20 }}
+                />
+              }
               <div className={classes.buttons}>
                 <Button
                   variant="contained"

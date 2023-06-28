@@ -129,23 +129,4 @@ const VocabulariesLines: FunctionComponent<VocabulariesLinesProps> = ({
   );
 };
 
-export const vocabulariesQuery = graphql`
-  query VocabulariesLinesQuery($category: VocabularyCategory!) {
-    vocabularies(category: $category) {
-      edges {
-        node {
-          id
-          name
-          description
-        }
-      }
-      pageInfo {
-        endCursor
-        hasNextPage
-        globalCount
-      }
-    }
-  }
-`;
-
 export default VocabulariesLines;

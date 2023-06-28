@@ -36,8 +36,9 @@ const Vocabularies = () => {
   const classes = useStyles();
   const { t, n } = useFormatter();
   const params = useParams() as { category: string };
-  const { typeToCategory } = useVocabularyCategory();
+  const { typeToCategory, isCategoryOrdered } = useVocabularyCategory();
   const category = typeToCategory(params.category);
+  const isOrdered = isCategoryOrdered(category);
   const { viewStorage, paginationOptions, helpers } = usePaginationLocalStorage<VocabulariesLines_DataQuery$variables>(
     `view-vocabulary-${category}`,
     {
@@ -107,12 +108,26 @@ const Vocabularies = () => {
         render: (node: useVocabularyCategory_Vocabularynode$data) => n(node.usages),
       },
     };
+    let finalDataColumns;
+    if (isOrdered) {
+      finalDataColumns = {
+        ...dataColumns,
+        order: {
+          label: 'Order',
+          width: '10%',
+          isSortable: false,
+          render: (node: useVocabularyCategory_Vocabularynode$data) => n(node.order),
+        },
+      };
+    } else {
+      finalDataColumns = dataColumns;
+    }
     return (
       <ListLines
         sortBy={viewStorage.sortBy}
         iconExtension={true}
         orderAsc={viewStorage.orderAsc}
-        dataColumns={dataColumns}
+        dataColumns={finalDataColumns}
         handleSort={helpers.handleSort}
         handleSearch={helpers.handleSearch}
         handleAddFilter={helpers.handleAddFilter}
@@ -132,7 +147,7 @@ const Vocabularies = () => {
               <VocabulariesLines
                 queryRef={queryRef}
                 paginationOptions={paginationOptions}
-                dataColumns={dataColumns}
+                dataColumns={finalDataColumns}
                 setNumberOfElements={helpers.handleSetNumberOfElements}
                 selectedElements={selectedElements}
                 deSelectedElements={deSelectedElements}
@@ -164,6 +179,7 @@ const Vocabularies = () => {
       {renderLines()}
       <VocabularyCreation
         category={category}
+        isCategoryOrdered={isOrdered}
         paginationOptions={paginationOptions}
       />
     </div>

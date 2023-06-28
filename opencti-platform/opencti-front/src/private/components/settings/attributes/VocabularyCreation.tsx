@@ -26,6 +26,7 @@ import AutocompleteFreeSoloField from '../../../../components/AutocompleteFreeSo
 interface VocabularyCreationProps {
   paginationOptions: VocabulariesLines_DataQuery$variables;
   category: VocabularyCategory;
+  isCategoryOrdered: boolean;
 }
 
 const useStyles = makeStyles<Theme>((theme) => ({
@@ -74,13 +75,20 @@ const vocabularyAdd = graphql`
   }
 `;
 
-const labelValidation = (t: (v: string) => string) => Yup.object().shape({
-  name: Yup.string().required(t('This field is required')),
-});
+const labelValidation = (t: (v: string) => string, isCategoryOrdered: boolean) => {
+  const shape = [['name', Yup.mixed().required(t('This field is required'))]];
+  if (isCategoryOrdered) {
+    shape.push(['order', Yup.mixed().required(t('This field is required'))]);
+  }
+  return Yup.object().shape({
+    ...Object.fromEntries(shape),
+  });
+};
 
 const VocabularyCreation: FunctionComponent<VocabularyCreationProps> = ({
   paginationOptions,
   category,
+  isCategoryOrdered,
 }) => {
   const classes = useStyles();
   const { t } = useFormatter();
@@ -94,6 +102,7 @@ const VocabularyCreation: FunctionComponent<VocabularyCreationProps> = ({
     name: string;
     description: string;
     aliases: { value: string }[];
+    order?: number;
   }
   const onSubmit: FormikConfig<FormInterface>['onSubmit'] = (
     values,
@@ -105,9 +114,18 @@ const VocabularyCreation: FunctionComponent<VocabularyCreationProps> = ({
       aliases: values.aliases.map((a) => a.value),
       category,
     };
+    let finalData: VocabularyAddInput;
+    if (isCategoryOrdered) {
+      finalData = {
+        ...data,
+        order: parseInt(String(values.order), 10),
+      };
+    } else {
+      finalData = data;
+    }
     addVocab({
       variables: {
-        input: data,
+        input: finalData,
       },
       updater: (store) => insertNode(
         store,
@@ -159,7 +177,7 @@ const VocabularyCreation: FunctionComponent<VocabularyCreationProps> = ({
               description: '',
               aliases: [] as { value: string }[],
             }}
-            validationSchema={labelValidation(t)}
+            validationSchema={labelValidation(t, isCategoryOrdered)}
             onSubmit={onSubmit}
             onReset={handleClose}
           >
@@ -200,6 +218,17 @@ const VocabularyCreation: FunctionComponent<VocabularyCreationProps> = ({
                   )}
                   classes={{ clearIndicator: classes.autoCompleteIndicator }}
                 />
+                {isCategoryOrdered
+                  && <Field
+                    component={TextField}
+                    variant="standard"
+                    name="order"
+                    label={t('Order')}
+                    fullWidth={true}
+                    type="number"
+                    style={{ marginTop: 20 }}
+                  />
+                }
                 <div className={classes.buttons}>
                   <Button
                     variant="contained"

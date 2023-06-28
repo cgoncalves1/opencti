@@ -24742,6 +24742,7 @@ export type Vocabulary = BasicObject & StixMetaObject & StixObject & {
   is_inferred: Scalars['Boolean'];
   modified?: Maybe<Scalars['DateTime']>;
   name: Scalars['String'];
+  order?: Maybe<Scalars['Int']>;
   parent_types: Array<Maybe<Scalars['String']>>;
   spec_version: Scalars['String'];
   standard_id: Scalars['String'];
@@ -24758,6 +24759,7 @@ export type VocabularyAddInput = {
   description?: InputMaybe<Scalars['String']>;
   modified?: InputMaybe<Scalars['DateTime']>;
   name: Scalars['String'];
+  order?: InputMaybe<Scalars['Int']>;
   stix_id?: InputMaybe<Scalars['StixId']>;
   update?: InputMaybe<Scalars['Boolean']>;
   x_opencti_stix_ids?: InputMaybe<Array<InputMaybe<Scalars['StixId']>>>;
@@ -24813,6 +24815,7 @@ export type VocabularyDefinition = {
   entity_types: Array<Scalars['String']>;
   fields: Array<VocabularyFieldDefinition>;
   key: VocabularyCategory;
+  ordered?: Maybe<Scalars['Boolean']>;
 };
 
 export type VocabularyEdge = {
@@ -34095,6 +34098,7 @@ export type VocabularyResolvers<ContextType = any, ParentType extends ResolversP
   is_inferred?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   modified?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  order?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   parent_types?: Resolver<Array<Maybe<ResolversTypes['String']>>, ParentType, ContextType>;
   spec_version?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   standard_id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -34116,6 +34120,7 @@ export type VocabularyDefinitionResolvers<ContextType = any, ParentType extends 
   entity_types?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
   fields?: Resolver<Array<ResolversTypes['VocabularyFieldDefinition']>, ParentType, ContextType>;
   key?: Resolver<ResolversTypes['VocabularyCategory'], ParentType, ContextType>;
+  ordered?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
