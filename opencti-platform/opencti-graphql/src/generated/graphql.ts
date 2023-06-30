@@ -24000,6 +24000,7 @@ export enum TriggerFilter {
   Filters = 'filters',
   GroupIds = 'group_ids',
   InstanceTrigger = 'instance_trigger',
+  OrganizationIds = 'organization_ids',
   TriggerType = 'trigger_type',
   UserIds = 'user_ids'
 }
