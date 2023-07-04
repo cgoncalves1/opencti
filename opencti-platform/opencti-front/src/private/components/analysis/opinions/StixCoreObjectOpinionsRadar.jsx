@@ -70,11 +70,6 @@ const StixCoreObjectOpinionsRadarComponent = (props) => {
       label: node.name.toLowerCase(),
       value: idx + 1,
     }));
-  const marks = opinionOptions.map((m, idx) => {
-    if (idx === 0) return { label: '-', value: m.value };
-    if (idx === opinionOptions.length - 1) return { label: '+', value: m.value };
-    return m;
-  });
   const opinionLabel = (currentOpinionValue) => opinionOptions[currentOpinionValue - 1].label;
   const opinionValue = (label) => opinionOptions.find((m) => m.label === label)?.value;
 
@@ -237,24 +232,38 @@ const StixCoreObjectOpinionsRadarComponent = (props) => {
                         <Form>
                           <DialogTitle>{containerProps.myOpinion ? t('Update opinion') : t('Create an opinion')}</DialogTitle>
                           <DialogContent>
-                            <Slider
-                              sx={{
-                                '& .MuiSlider-markLabel': {
-                                  textOverflow: 'ellipsis',
-                                  maxWidth: 50,
-                                  overflow: 'hidden',
-                                },
-                              }}
-                              style={{ marginTop: 30 }}
-                              value={value}
-                              onChange={(_, v) => handleChangeCurrentOpinion(v)}
-                              step={1}
-                              valueLabelDisplay="on"
-                              valueLabelFormat={(v) => marks[v - 1].label}
-                              marks={marks}
-                              min={1}
-                              max={opinionOptions.length}
-                            />
+                            <div style={{ marginLeft: 10, marginRight: 10 }}>
+                              <Slider
+                                sx={{
+                                  '& .MuiSlider-markLabel': {
+                                    textOverflow: 'ellipsis',
+                                    maxWidth: 50,
+                                    overflow: 'hidden',
+                                  },
+                                  '& .MuiSlider-thumb[style*="left: 0%"] .MuiSlider-valueLabelOpen': {
+                                    left: -5,
+                                    '&:before': {
+                                      left: '22%',
+                                    },
+                                  },
+                                  '& .MuiSlider-thumb[style*="left: 100%"] .MuiSlider-valueLabelOpen': {
+                                    right: -5,
+                                    '&:before': {
+                                      left: '88%',
+                                    },
+                                  },
+                                }}
+                                style={{ marginTop: 30 }}
+                                value={value}
+                                onChange={(_, v) => handleChangeCurrentOpinion(v)}
+                                step={1}
+                                valueLabelDisplay="on"
+                                valueLabelFormat={(v) => opinionOptions[v - 1].label}
+                                marks={opinionOptions}
+                                min={1}
+                                max={opinionOptions.length}
+                              />
+                            </div>
                             <Field
                               component={MarkdownField}
                               name="explanation"

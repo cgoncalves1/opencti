@@ -1,6 +1,6 @@
 import { adaptFieldValue } from './String';
 
-export const formikFieldToEditInput = <T extends Record<string, unknown>>(
+const formikFieldToEditInput = <T extends Record<string, unknown>>(
   current: T,
   previous: T,
 ) => {
@@ -12,3 +12,5 @@ export const formikFieldToEditInput = <T extends Record<string, unknown>>(
   });
   return Object.entries(object).map(([key, value]) => ({ key, value: adaptFieldValue(value) }));
 };
+
+export default formikFieldToEditInput;

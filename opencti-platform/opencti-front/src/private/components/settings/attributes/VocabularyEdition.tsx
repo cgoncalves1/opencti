@@ -11,7 +11,7 @@ import makeStyles from '@mui/styles/makeStyles';
 import { FormikConfig } from 'formik/dist/types';
 import * as R from 'ramda';
 import { useFormatter } from '../../../../components/i18n';
-import { formikFieldToEditInput } from '../../../../utils/FormikUtils';
+import formikFieldToEditInput from '../../../../utils/FormikUtils';
 import { Theme } from '../../../../components/Theme';
 import { useVocabularyCategory_Vocabularynode$data } from '../../../../utils/hooks/__generated__/useVocabularyCategory_Vocabularynode.graphql';
 import { fieldSpacingContainerStyle } from '../../../../utils/field';
