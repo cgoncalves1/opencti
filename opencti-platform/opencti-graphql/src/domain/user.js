@@ -17,12 +17,14 @@ import {
   updateAttribute, updatedInputsToData,
 } from '../database/middleware';
 import {
+  internalFindByIds,
   listAllEntities,
   listAllEntitiesForFilter,
   listAllRelations,
   listEntities,
   storeLoadById
 } from '../database/middleware-loader';
+import { ENTITY_TYPE_WORKSPACE } from "../modules/workspace/workspace-types";
 import {
   ENTITY_TYPE_CAPABILITY,
   ENTITY_TYPE_GROUP,
@@ -1110,6 +1112,13 @@ export const initAdmin = async (context, email, password, tokenValue) => {
     await addUser(context, SYSTEM_USER, userToCreate);
     await userSessionRefresh(OPENCTI_ADMIN_UUID);
   }
+};
+
+export const findDefaultDashboards = async (context, user, currentUser) => {
+  const groupsDashboardIds = (currentUser.groups ?? []).map(({ default_dashboard }) => default_dashboard);
+  const orgaDashboardIds = (currentUser.organizations ?? []).map(({ default_dashboard }) => default_dashboard);
+  const ids = [...orgaDashboardIds, ...groupsDashboardIds].filter((id) => id);
+  return await internalFindByIds(context, user, ids, { type: ENTITY_TYPE_WORKSPACE });
 };
 
 // region context

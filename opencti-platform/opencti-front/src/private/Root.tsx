@@ -24,6 +24,10 @@ const rootPrivateQuery = graphql`
       capabilities {
         name
       }
+      default_dashboards {
+        id
+        name
+      }
       default_hidden_types
       default_marking {
         entity_type

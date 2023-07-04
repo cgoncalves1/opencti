@@ -1,24 +1,23 @@
-import React, { Component } from 'react';
-import * as PropTypes from 'prop-types';
-import { compose } from 'ramda';
-import withStyles from '@mui/styles/withStyles';
 import { SettingsOutlined } from '@mui/icons-material';
-import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
-import IconButton from '@mui/material/IconButton';
-import DialogContent from '@mui/material/DialogContent';
-import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel';
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
-import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import FormControl from '@mui/material/FormControl';
+import IconButton from '@mui/material/IconButton';
+import InputLabel from '@mui/material/InputLabel';
+import ListSubheader from '@mui/material/ListSubheader';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
 import Slide from '@mui/material/Slide';
+import React, { useState } from 'react';
 import { graphql } from 'react-relay';
+import { useFormatter } from '../../components/i18n';
 import { QueryRenderer } from '../../relay/environment';
-import Security from '../../utils/Security';
+import useAuth from '../../utils/hooks/useAuth';
 import { EXPLORE } from '../../utils/hooks/useGranted';
-import inject18n from '../../components/i18n';
+import Security from '../../utils/Security';
 
 const Transition = React.forwardRef((props, ref) => (
   <Slide direction="up" ref={ref} {...props} />
@@ -48,45 +47,30 @@ export const dashboardSettingsDashboardsQuery = graphql`
   }
 `;
 
-const styles = (theme) => ({
-  icon: {
-    marginLeft: theme.spacing(1),
-  },
-});
+const DashboardSettings = ({
+  handleChangeTimeField,
+  timeField,
+  handleChangeDashboard,
+  dashboard,
+}) => {
+  const { t } = useFormatter();
+  const { me: { default_dashboards: dashboards } } = useAuth();
 
-class DashboardSettings extends Component {
-  constructor(props) {
-    super(props);
-    this.state = { open: false };
-  }
+  const [open, setOpen] = useState(false);
 
-  handleOpen() {
-    this.setState({ open: true });
-  }
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
 
-  handleClose() {
-    this.setState({ open: false });
-  }
-
-  render() {
-    const {
-      t,
-      handleChangeTimeField,
-      timeField,
-      handleChangeDashboard,
-      dashboard,
-    } = this.props;
-    const { open } = this.state;
-    return (
-      <span>
-        <IconButton onClick={this.handleOpen.bind(this)} size="medium">
+  return (
+    <span>
+        <IconButton onClick={handleOpen} size="medium">
           <SettingsOutlined fontSize="small" />
         </IconButton>
         <Dialog
           open={open}
           PaperProps={{ elevation: 1 }}
           TransitionComponent={Transition}
-          onClose={this.handleClose.bind(this)}
+          onClose={handleClose}
           maxWidth="xs"
           fullWidth={true}
         >
@@ -104,7 +88,7 @@ class DashboardSettings extends Component {
                       labelId="timeField"
                       variant="standard"
                       value={timeField === null ? '' : timeField}
-                      onChange={handleChangeTimeField.bind(this)}
+                      onChange={handleChangeTimeField}
                       fullWidth={true}
                     >
                       <MenuItem value="technical">
@@ -138,7 +122,7 @@ class DashboardSettings extends Component {
                             labelId="timeField"
                             variant="standard"
                             value={timeField === null ? '' : timeField}
-                            onChange={handleChangeTimeField.bind(this)}
+                            onChange={handleChangeTimeField}
                             fullWidth={true}
                           >
                             <MenuItem value="technical">
@@ -157,26 +141,41 @@ class DashboardSettings extends Component {
                             labelId="dashboard"
                             variant="standard"
                             value={dashboard === null ? '' : dashboard}
-                            onChange={handleChangeDashboard.bind(this)}
+                            onChange={handleChangeDashboard}
                             fullWidth={true}
                           >
+                            {dashboards?.length > 0 && (
+                              <>
+                                <ListSubheader>{t('Default Dashboards')}</ListSubheader>
+                                <>
+                                  {dashboards.map(({ id, name }) => (
+                                    <MenuItem
+                                      key={id}
+                                      value={id}
+                                    >
+                                      {name}
+                                    </MenuItem>
+                                  ))}
+                                </>
+                              </>
+                            )}
+                            <ListSubheader>{t('Dashboards')}</ListSubheader>
                             {[
                               ...(props.workspaces?.edges ?? []),
-                              { node: {
-                                id: 'b9bea5e1-027d-47ef-9a12-02beaae6ba9d',
-                                name: 'Default',
-                              } },
-                            ].map((workspaceEdge) => {
-                              const workspace = workspaceEdge.node;
-                              return (
-                                <MenuItem
-                                  key={workspace.id}
-                                  value={workspace.id}
-                                >
-                                  {workspace.name}
-                                </MenuItem>
-                              );
-                            })}
+                              {
+                                node: {
+                                  id: 'b9bea5e1-027d-47ef-9a12-02beaae6ba9d',
+                                  name: 'Default',
+                                },
+                              },
+                            ].map(({ node }) => (
+                              <MenuItem
+                                key={node.id}
+                                value={node.id}
+                              >
+                                {node.name}
+                              </MenuItem>
+                            ))}
                           </Select>
                         </FormControl>
                       </div>
@@ -188,26 +187,11 @@ class DashboardSettings extends Component {
             </Security>
           </DialogContent>
           <DialogActions>
-            <Button onClick={this.handleClose.bind(this)}>{t('Close')}</Button>
+            <Button onClick={handleClose}>{t('Close')}</Button>
           </DialogActions>
         </Dialog>
       </span>
-    );
-  }
-}
-
-DashboardSettings.propTypes = {
-  me: PropTypes.object,
-  classes: PropTypes.object,
-  theme: PropTypes.object,
-  t: PropTypes.func,
-  handleChangeDashboard: PropTypes.func,
-  dashboard: PropTypes.string,
-  handleChangeTimeField: PropTypes.func,
-  timeField: PropTypes.string,
+  );
 };
 
-export default compose(
-  inject18n,
-  withStyles(styles, { withTheme: true }),
-)(DashboardSettings);
+export default DashboardSettings;

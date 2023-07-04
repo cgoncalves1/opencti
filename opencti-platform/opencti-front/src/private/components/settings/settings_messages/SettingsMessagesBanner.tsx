@@ -90,8 +90,10 @@ const extractMessagesToDisplay = (messagesFromLocalStorage: MessageFromLocalStor
     });
 };
 
+const ref = React.createRef<HTMLDivElement>();
+
 export const useSettingsMessagesBannerHeight = () => {
-  const [bannerHeight, setBannerHeight] = useState(0);
+  const [bannerHeight, setBannerHeight] = useState(ref.current?.clientHeight);
   useBus(BANNER_LOCAL_STORAGE_KEY, (size: number) => setBannerHeight(size ?? 0));
   return bannerHeight;
 };
@@ -102,7 +104,6 @@ const SettingsMessagesBannerComponent = ({
   queryRef,
 }: { queryRef: PreloadedQuery<SettingsMessagesBannerQuery> }) => {
   const classes = useStyles();
-  const ref = useRef<HTMLDivElement>(null);
 
   const { settings } = usePreloadedQuery<SettingsMessagesBannerQuery>(settingsMessagesQuery, queryRef);
   const config = useMemo<GraphQLSubscriptionConfig<SettingsMessagesBannerSubscription>>(() => ({

@@ -33,6 +33,18 @@ const organizationQuery = graphql`
       x_opencti_aliases
       ...SettingsOrganization_organization
     }
+    workspaces {
+      edges {
+        node {
+          id
+          name
+          authorizedMembers {
+            id
+            name
+          }
+        }
+      }
+    }
   }
 `;
 interface RootSettingsOrganizationComponentProps {
@@ -49,7 +61,7 @@ const RootSettingsOrganizationComponent: FunctionComponent<RootSettingsOrganizat
   );
   useSubscription(subConfig);
   const data = usePreloadedQuery(organizationQuery, queryRef);
-  const { organization } = data;
+  const { organization, workspaces } = data;
   return (
     <Security needs={[SETTINGS_SETACCESSES]}>
       {organization ? (
@@ -58,7 +70,7 @@ const RootSettingsOrganizationComponent: FunctionComponent<RootSettingsOrganizat
             exact
             path="/dashboard/settings/accesses/organizations/:organizationId"
             render={(routeProps) => (
-              <SettingsOrganization {...routeProps} organizationData={organization} />
+              <SettingsOrganization {...routeProps} organizationData={organization} workspaces={workspaces} />
             )}
           />
         </Switch>

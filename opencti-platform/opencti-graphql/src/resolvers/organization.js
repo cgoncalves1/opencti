@@ -10,6 +10,7 @@ import {
 import { RELATION_CREATED_BY, RELATION_OBJECT_LABEL, RELATION_OBJECT_MARKING } from '../schema/stixRefRelationship';
 import { buildRefRelationKey } from '../schema/general';
 import { batchLoader } from '../database/middleware';
+import { findById as findWorkspaceById } from '../modules/workspace/workspace-domain'
 
 const sectorsLoader = batchLoader(batchSectors);
 const membersLoader = batchLoader(batchMembers);
@@ -26,6 +27,7 @@ const organizationResolvers = {
     members: (organization, _, context) => membersLoader.load(organization.id, context, context.user),
     subOrganizations: (organization, _, context) => subOrganizationsLoader.load(organization.id, context, context.user),
     parentOrganizations: (organization, _, context) => parentOrganizationsLoader.load(organization.id, context, context.user),
+    default_dashboard: (organization, _, context) => findWorkspaceById(context, context.user, organization.default_dashboard),
   },
   OrganizationsFilter: {
     createdBy: buildRefRelationKey(RELATION_CREATED_BY),

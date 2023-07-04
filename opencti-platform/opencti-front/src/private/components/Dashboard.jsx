@@ -27,6 +27,7 @@ import { areaChartOptions, polarAreaChartOptions } from '../../utils/Charts';
 import { hexToRGB } from '../../utils/Colors';
 import { resolveLink } from '../../utils/Entity';
 import { defaultValue } from '../../utils/Graph';
+import useAuth from "../../utils/hooks/useAuth";
 import { EXPLORE, KNOWLEDGE } from '../../utils/hooks/useGranted';
 import { usePaginationLocalStorage } from '../../utils/hooks/useLocalStorage';
 import { computeLevel, simpleNumberFormat } from '../../utils/Number';
@@ -907,6 +908,7 @@ const CustomDashboard = ({ dashboard, timeField }) => {
 
 const Dashboard = () => {
   const classes = useStyles();
+  const { me: { default_dashboards: dashboards } } = useAuth();
   const {
     viewStorage: localTimeFieldPreferences,
     helpers: { handleAddProperty },
@@ -914,6 +916,8 @@ const Dashboard = () => {
   const { timeField = 'technical', dashboard } = localTimeFieldPreferences;
   const handleChangeTimeField = (event) => handleAddProperty('timeField', event.target.value);
   const handleChangeDashboard = (event) => handleAddProperty('dashboard', event.target.value);
+
+  const defaultDashboard = dashboard ?? dashboards[0]?.id;
 
   return (
     <div className={classes.root}>
@@ -923,8 +927,8 @@ const Dashboard = () => {
         handleChangeDashboard={handleChangeDashboard}
         dashboard={dashboard}
       />
-      {(dashboard && dashboard !== 'b9bea5e1-027d-47ef-9a12-02beaae6ba9d')
-        ? <CustomDashboard dashboard={dashboard} timeField={timeField} />
+      {(defaultDashboard && defaultDashboard !== 'b9bea5e1-027d-47ef-9a12-02beaae6ba9d')
+        ? <CustomDashboard dashboard={defaultDashboard} timeField={timeField} />
         : <DefaultDashboard timeField={timeField} />
       }
     </div>
