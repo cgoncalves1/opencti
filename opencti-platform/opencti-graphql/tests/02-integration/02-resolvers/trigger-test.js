@@ -63,8 +63,8 @@ const UPDATE_QUERY = gql`
 `;
 
 const DELETE_QUERY = gql`
-    mutation triggerDelete($id: ID!) {
-        triggerDelete(id: $id)
+    mutation triggerKnowledgeDelete($id: ID!) {
+        triggerKnowledgeDelete(id: $id)
     }
 `;
 
@@ -140,9 +140,9 @@ describe('Trigger resolver standard behavior', () => {
       variables: GROUP_TRIGGER_TO_CREATE,
     });
     expect(trigger).not.toBeNull();
-    expect(trigger.data.triggerLiveAdd).not.toBeNull();
-    expect(trigger.data.triggerLiveAdd.name).toEqual('group trigger');
-    triggerGroupInternalId = trigger.data.triggerLiveAdd.id;
+    expect(trigger.data.triggerKnowledgeLiveAdd).not.toBeNull();
+    expect(trigger.data.triggerKnowledgeLiveAdd.name).toEqual('group trigger');
+    triggerGroupInternalId = trigger.data.triggerKnowledgeLiveAdd.id;
   });
   it('editor user should list group trigger', async () => {
     const queryResult = await editorQuery({ query: LIST_QUERY, variables: { first: 10 } });
@@ -187,9 +187,9 @@ describe('Trigger resolver standard behavior', () => {
       variables: TRIGGER_TO_CREATE_FOR_USER,
     });
     expect(trigger).not.toBeNull();
-    expect(trigger.data.triggerLiveAdd).not.toBeNull();
-    expect(trigger.data.triggerLiveAdd.name).toEqual('trigger');
-    triggerUserInternalId = trigger.data.triggerLiveAdd.id;
+    expect(trigger.data.triggerKnowledgeLiveAdd).not.toBeNull();
+    expect(trigger.data.triggerKnowledgeLiveAdd.name).toEqual('trigger');
+    triggerUserInternalId = trigger.data.triggerKnowledgeLiveAdd.id;
   });
   it('should list triggers', async () => {
     const queryResult = await queryAsAdmin({ query: LIST_QUERY, variables: { first: 10 } });
