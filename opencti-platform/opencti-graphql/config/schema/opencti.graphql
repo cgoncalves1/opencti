@@ -963,6 +963,7 @@ input SettingsMessageInput {
   message: String!
   activated: Boolean!
   dismissible: Boolean!
+  color: String
 }
 type SettingsMessage {
   id: ID!
@@ -970,6 +971,7 @@ type SettingsMessage {
   activated: Boolean!
   dismissible: Boolean!
   updated_at: DateTime!
+  color: String
 }
 type Settings implements InternalObject & BasicObject {
   id: ID!

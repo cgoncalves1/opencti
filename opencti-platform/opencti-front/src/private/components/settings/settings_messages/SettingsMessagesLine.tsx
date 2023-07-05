@@ -56,6 +56,7 @@ const settingsMessageFragment = graphql`
     activated
     dismissible
     updated_at
+    color
   }
 `;
 
