@@ -22885,6 +22885,7 @@ export type Task = BasicObject & Container & StixCoreObject & StixDomainObject &
   objectLabel?: Maybe<LabelConnection>;
   objectMarking?: Maybe<MarkingDefinitionConnection>;
   objectOrganization?: Maybe<OrganizationConnection>;
+  objectParticipant?: Maybe<ParticipantConnection>;
   objects?: Maybe<StixObjectOrStixRelationshipRefConnection>;
   observedData?: Maybe<ObservedDataConnection>;
   opinions?: Maybe<OpinionConnection>;
@@ -23070,6 +23071,7 @@ export type TaskAddInput = {
   objectLabel?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
   objectMarking?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
   objectOrganization?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
+  objectParticipant?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
   objects?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
   update?: InputMaybe<Scalars['Boolean']>;
 };
@@ -23155,6 +23157,7 @@ export enum TasksFilter {
   Modified = 'modified',
   Name = 'name',
   ObjectContains = 'objectContains',
+  Participant = 'participant',
   UpdatedAt = 'updated_at',
   XOpenctiWorkflowId = 'x_opencti_workflow_id'
 }
@@ -33667,6 +33670,7 @@ export type TaskResolvers<ContextType = any, ParentType extends ResolversParentT
   objectLabel?: Resolver<Maybe<ResolversTypes['LabelConnection']>, ParentType, ContextType>;
   objectMarking?: Resolver<Maybe<ResolversTypes['MarkingDefinitionConnection']>, ParentType, ContextType>;
   objectOrganization?: Resolver<Maybe<ResolversTypes['OrganizationConnection']>, ParentType, ContextType>;
+  objectParticipant?: Resolver<Maybe<ResolversTypes['ParticipantConnection']>, ParentType, ContextType>;
   objects?: Resolver<Maybe<ResolversTypes['StixObjectOrStixRelationshipRefConnection']>, ParentType, ContextType, Partial<TaskObjectsArgs>>;
   observedData?: Resolver<Maybe<ResolversTypes['ObservedDataConnection']>, ParentType, ContextType, Partial<TaskObservedDataArgs>>;
   opinions?: Resolver<Maybe<ResolversTypes['OpinionConnection']>, ParentType, ContextType, Partial<TaskOpinionsArgs>>;
