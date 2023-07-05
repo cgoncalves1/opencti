@@ -193,6 +193,7 @@ export const TriggerLineComponent: FunctionComponent<TriggerLineProps> = ({
                     label={eventTypes[n]}
                   />
                 ))}
+              {(data.event_types && data.event_types?.length > 1) && '...'}
               {data.triggers
                 && data.triggers.map((n) => (
                   <Chip
@@ -203,6 +204,7 @@ export const TriggerLineComponent: FunctionComponent<TriggerLineProps> = ({
                     label={n?.name}
                   />
                 ))}
+              {(data.triggers && data.triggers?.length > 1) && '...'}
             </div>
             {data.trigger_type === 'live' && (
               <FilterIconButton
