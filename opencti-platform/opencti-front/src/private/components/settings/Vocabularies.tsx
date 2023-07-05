@@ -115,7 +115,7 @@ const Vocabularies = () => {
         order: {
           label: 'Order',
           width: '10%',
-          isSortable: false,
+          isSortable: true,
           render: (node: useVocabularyCategory_Vocabularynode$data) => n(node.order),
         },
       };

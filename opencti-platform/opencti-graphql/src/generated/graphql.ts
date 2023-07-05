@@ -24849,7 +24849,8 @@ export type VocabularyFiltering = {
 export enum VocabularyOrdering {
   Category = 'category',
   Description = 'description',
-  Name = 'name'
+  Name = 'name',
+  Order = 'order'
 }
 
 export enum VulnerabilitiesFilter {

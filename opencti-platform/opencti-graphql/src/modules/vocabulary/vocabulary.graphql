@@ -82,6 +82,7 @@ enum VocabularyOrdering {
   name
   category
   description
+  order
 }
 
 # Filtering

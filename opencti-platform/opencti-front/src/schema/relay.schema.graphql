@@ -9637,6 +9637,7 @@ enum VocabularyOrdering {
   name
   category
   description
+  order
 }
 
 enum VocabularyFilter {

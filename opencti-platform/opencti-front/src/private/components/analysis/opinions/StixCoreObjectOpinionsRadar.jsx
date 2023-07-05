@@ -237,7 +237,7 @@ const StixCoreObjectOpinionsRadarComponent = (props) => {
                                 sx={{
                                   '& .MuiSlider-markLabel': {
                                     textOverflow: 'ellipsis',
-                                    maxWidth: 50,
+                                    maxWidth: 60,
                                     overflow: 'hidden',
                                   },
                                   '& .MuiSlider-thumb[style*="left: 0%"] .MuiSlider-valueLabelOpen': {
