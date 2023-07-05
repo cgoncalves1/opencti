@@ -10206,6 +10206,7 @@ enum CaseIncidentsOrdering {
   updated_at
   creator
   createdBy
+  objectAssignee
   x_opencti_workflow_id
   confidence
   objectMarking
@@ -10340,6 +10341,7 @@ enum CaseRfisOrdering {
   updated_at
   creator
   createdBy
+  objectAssignee
   x_opencti_workflow_id
   confidence
   objectMarking
@@ -10476,6 +10478,7 @@ enum CaseRftsOrdering {
   updated_at
   creator
   createdBy
+  objectAssignee
   x_opencti_workflow_id
   confidence
   objectMarking
