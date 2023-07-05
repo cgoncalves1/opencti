@@ -3371,6 +3371,7 @@ enum ReportsFilter {
   createdBy
   markedBy
   assigneeTo
+  participant
   labelledBy
   objectContains
   x_opencti_workflow_id
@@ -3515,6 +3516,7 @@ type Report implements BasicObject & StixObject & StixCoreObject & StixDomainObj
   content_mapping: String
   report_types: [String]
   published: DateTime
+  objectParticipant: ParticipantConnection
   # Technical
   creators: [Creator!]
   toStix: String
@@ -3544,6 +3546,7 @@ input ReportAddInput {
   objectOrganization: [String]
   objectMarking: [String]
   objectAssignee: [String]
+  objectParticipant: [String]
   objectLabel: [String]
   externalReferences: [String]
   objects: [String]
